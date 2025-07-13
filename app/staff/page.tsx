@@ -2,6 +2,7 @@
 import { getStaff } from './actions'; // Import your server action
 import { DataTable } from '@/components/ui/data-table'; // The data table component
 import { columns } from './columns'; // Your column definitions
+import { AddStaffModal } from '@/components/add-staff-modal'; // The add staff modal
 
 export default async function StaffPage() {
   const staff = await getStaff(); // Data fetched directly on the server!
@@ -28,7 +29,11 @@ export default async function StaffPage() {
         </div>
       </div>
 
-      <h2 className="text-3xl font-bold mb-6 mt-8">All Staff Members</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold">All Staff Members</h2>
+        <AddStaffModal />
+      </div>
+      
       <DataTable columns={columns} data={staff} />
     </div>
   );

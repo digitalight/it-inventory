@@ -1,103 +1,134 @@
-import Image from "next/image";
+// app/page.tsx
+import { getDashboardStats, getLeavingStaff } from './dashboard/actions';
+import { DashboardCard } from '@/components/dashboard-card';
+import { DataTable } from '@/components/ui/data-table';
+import { leavingStaffColumns } from '@/components/leaving-staff-columns';
+import { Laptop, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
-export default function Home() {
+export default async function DashboardPage() {
+  const [stats, leavingStaff] = await Promise.all([
+    getDashboardStats(),
+    getLeavingStaff()
+  ]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="container mx-auto py-10">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-4xl font-extrabold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-2">Overview of your IT inventory system</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="flex gap-3">
+          <Link href="/laptops">
+            <Button variant="outline">Manage Laptops</Button>
+          </Link>
+          <Link href="/staff">
+            <Button variant="outline">Manage Staff</Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Dashboard Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <DashboardCard
+          title="Laptops Assigned"
+          value={stats.assignedLaptops}
+          description="Currently assigned to staff"
+          iconName="laptop"
+          className="border-blue-200 bg-blue-50"
+        />
+        
+        <DashboardCard
+          title="Current Staff"
+          value={stats.currentStaff}
+          description="Active staff members"
+          iconName="users"
+          className="border-green-200 bg-green-50"
+        />
+        
+        <DashboardCard
+          title="Laptops in Repair"
+          value={stats.laptopsInRepair}
+          description="Currently being repaired"
+          iconName="wrench"
+          className="border-orange-200 bg-orange-50"
+        />
+        
+        <DashboardCard
+          title="Departing Staff Laptops"
+          value={stats.laptopsWithLeavingStaff}
+          description="Staff leaving in next 3 months"
+          iconName="alertTriangle"
+          className="border-red-200 bg-red-50"
+        />
+      </div>
+
+      {/* Bottom Section - Grid with Quick Actions and Leaving Staff */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Quick Actions and System Status */}
+        <div className="space-y-8">
+          {/* Quick Actions */}
+          <div className="bg-white p-6 rounded-lg shadow-md border">
+            <h2 className="text-2xl font-semibold mb-4 border-b pb-3">Quick Actions</h2>
+            <div className="space-y-3">
+              <Link href="/laptops">
+                <Button variant="ghost" className="w-full justify-start">
+                  <Laptop className="mr-2 h-4 w-4" />
+                  View All Laptops
+                </Button>
+              </Link>
+              <Link href="/staff">
+                <Button variant="ghost" className="w-full justify-start">
+                  <Users className="mr-2 h-4 w-4" />
+                  View All Staff
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* System Status */}
+          <div className="bg-white p-6 rounded-lg shadow-md border">
+            <h2 className="text-2xl font-semibold mb-4 border-b pb-3">System Status</h2>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Total Laptops</span>
+                <span className="font-semibold">{stats.assignedLaptops + stats.laptopsInRepair}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Available Laptops</span>
+                <span className="font-semibold text-green-600">
+                  {Math.max(0, stats.assignedLaptops - stats.laptopsInRepair)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">System Health</span>
+                <span className="font-semibold text-green-600">Operational</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Leaving Staff Table */}
+        <div className="bg-white p-6 rounded-lg shadow-md border">
+          <div className="flex justify-between items-center mb-4 border-b pb-3">
+            <h2 className="text-2xl font-semibold">Staff Leaving Soon</h2>
+            <span className="text-sm text-gray-500">Next 3 months</span>
+          </div>
+          {leavingStaff.length > 0 ? (
+            <DataTable 
+              columns={leavingStaffColumns} 
+              data={leavingStaff}
+            />
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Users className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+              <p>No staff are scheduled to leave in the next 3 months</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -12,6 +12,101 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { useState } from "react"
+import { toast } from "sonner"
+import EditStaffForm from "./edit-staff-form"
+import { deleteStaff } from "./actions"
+import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
+
+// Actions cell component
+function ActionsCell({ staff }: { staff: StaffWithLaptops }) {
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    const result = await deleteStaff(staff.id)
+    
+    if (result?.error) {
+      toast.error('Error: ' + result.error)
+    } else {
+      toast.success('Staff member deleted successfully')
+      setDeleteModalOpen(false)
+    }
+    setIsDeleting(false)
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => {
+              navigator.clipboard.writeText(`${staff.firstname} ${staff.lastname}`)
+              toast.success('Name copied to clipboard')
+            }}
+          >
+            Copy Name
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
+            Edit Staff
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="text-red-600"
+            onClick={() => setDeleteModalOpen(true)}
+          >
+            Delete Staff
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Edit Modal */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Staff Member</DialogTitle>
+            <DialogDescription>
+              Update the staff member details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <EditStaffForm 
+              staff={staff} 
+              onSuccess={() => setEditModalOpen(false)} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <ConfirmDeleteDialog
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Staff Member"
+        description={`Are you sure you want to delete this staff member? ${staff.laptops && staff.laptops.length > 0 ? 'This staff member has assigned laptops and cannot be deleted.' : 'This will remove them from the system.'}`}
+        itemName={`${staff.firstname} ${staff.lastname} (${staff.email})`}
+        isDeleting={isDeleting}
+      />
+    </>
+  )
+}
 
 // Define the type for staff with laptops relationship
 type StaffWithLaptops = {
@@ -86,7 +181,7 @@ export const columns: ColumnDef<StaffWithLaptops>[] = [
       const isTeacher = row.getValue("isteacher") as boolean
       return (
         <span className={isTeacher ? 'text-blue-600 font-medium' : 'text-gray-600'}>
-          {isTeacher ? 'Teacher' : 'Staff'}
+          {isTeacher ? 'Teacher' : 'Associate'}
         </span>
       )
     },
@@ -148,32 +243,7 @@ export const columns: ColumnDef<StaffWithLaptops>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const staff = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => {
-                navigator.clipboard.writeText(`${staff.firstname} ${staff.lastname}`);
-              }}
-            >
-              Copy Name
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View Details</DropdownMenuItem>
-            <DropdownMenuItem>Edit Staff</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Delete Staff</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+      return <ActionsCell staff={row.original} />
     },
   },
 ]

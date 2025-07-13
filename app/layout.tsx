@@ -5,8 +5,6 @@ import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner'; // Make sure this is imported
-import { AddLaptopModal } from '@/components/add-laptop-modal';
-import { AddStaffModal } from '@/components/add-staff-modal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,12 +23,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <nav className="bg-gradient-to-r from-blue-700 to-indigo-800 p-4 text-white shadow-lg">
           <div className="container mx-auto flex justify-between items-center">
-            <Link href="/laptops" passHref>
+            <Link href="/" passHref>
               <span className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors">Laptop Tracker</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <AddLaptopModal />
-              <AddStaffModal />
+              <Link href="/" passHref>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Dashboard</Button>
+              </Link>
               <Link href="/laptops" passHref>
                 <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Laptops</Button>
               </Link>

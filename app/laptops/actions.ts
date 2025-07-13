@@ -214,3 +214,75 @@ export async function importLaptopsFromCSV(formData: FormData) {
     return { error: 'Failed to process CSV file. Please check the file format.' };
   }
 }
+
+export async function updateLaptop(formData: FormData) {
+  const id = formData.get('id') as string;
+  const make = formData.get('make') as string;
+  const model = formData.get('model') as string;
+  const serialNumber = formData.get('serialNumber') as string;
+  const status = formData.get('status') as string;
+  const assignedToEmail = formData.get('assignedTo') as string | null;
+
+  if (!id || !make || !model || !serialNumber || !status) {
+    return { error: 'Missing required fields.' };
+  }
+
+  try {
+    let assignedToId = null;
+    
+    // If email is provided, find or create the staff member
+    if (assignedToEmail && assignedToEmail.trim()) {
+      const existingStaff = await prisma.staff.findUnique({
+        where: { email: assignedToEmail.trim() }
+      });
+      
+      if (existingStaff) {
+        assignedToId = existingStaff.id;
+      } else {
+        // Create basic staff record with email only
+        const newStaff = await prisma.staff.create({
+          data: {
+            email: assignedToEmail.trim(),
+            firstname: 'Unknown',
+            lastname: 'Staff',
+            isteacher: false,
+          }
+        });
+        assignedToId = newStaff.id;
+      }
+    }
+
+    await prisma.laptop.update({
+      where: { id },
+      data: {
+        make,
+        model,
+        serialNumber,
+        status,
+        assignedToId,
+      },
+    });
+    revalidatePath('/laptops');
+    return { success: true };
+  } catch (e: unknown) {
+    const error = e as { code?: string; message?: string };
+    if (error.code === 'P2002') {
+      return { error: `A laptop with serial number "${serialNumber}" already exists.` };
+    }
+    console.error('Error updating laptop:', e);
+    return { error: 'Failed to update laptop. Please try again.' };
+  }
+}
+
+export async function deleteLaptop(id: string) {
+  try {
+    await prisma.laptop.delete({
+      where: { id },
+    });
+    revalidatePath('/laptops');
+    return { success: true };
+  } catch (e: unknown) {
+    console.error('Error deleting laptop:', e);
+    return { error: 'Failed to delete laptop. Please try again.' };
+  }
+}

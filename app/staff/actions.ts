@@ -174,3 +174,65 @@ export async function importStaffFromCSV(formData: FormData) {
         return { error: 'Failed to process CSV file. Please check the file format.' };
     }
 }
+
+export async function updateStaff(formData: FormData) {
+    const id = formData.get('id') as string;
+    const email = formData.get('email') as string;
+    const firstname = formData.get('firstname') as string;
+    const lastname = formData.get('lastname') as string;
+    const department = formData.get('department') as string;
+    const isteacher = formData.get('isteacher') === 'true';
+    const startDate = formData.get('startDate') as string;
+    const leavingDate = formData.get('leavingDate') as string;
+
+    if (!id || !email || !firstname || !lastname) {
+        return { error: 'ID, email, first name and last name are required.' };
+    }
+
+    try {
+        await prisma.staff.update({
+            where: { id },
+            data: {
+                email,
+                firstname,
+                lastname,
+                department: department || null,
+                isteacher,
+                startDate: startDate ? new Date(startDate) : new Date(),
+                leavingDate: leavingDate ? new Date(leavingDate) : null,
+            },
+        });
+        revalidatePath('/staff');
+        return { success: true };
+    } catch (e: unknown) {
+        const error = e as { code?: string; message?: string };
+        if (error.code === 'P2002') {
+            return { error: `A staff member with email "${email}" already exists.` };
+        }
+        console.error('Error updating staff:', e);
+        return { error: 'Failed to update staff. Please try again.' };
+    }
+}
+
+export async function deleteStaff(id: string) {
+    try {
+        // Check if staff has assigned laptops
+        const staffWithLaptops = await prisma.staff.findUnique({
+            where: { id },
+            include: { laptops: true }
+        });
+
+        if (staffWithLaptops?.laptops && staffWithLaptops.laptops.length > 0) {
+            return { error: 'Cannot delete staff member with assigned laptops. Please reassign or remove laptops first.' };
+        }
+
+        await prisma.staff.delete({
+            where: { id },
+        });
+        revalidatePath('/staff');
+        return { success: true };
+    } catch (e: unknown) {
+        console.error('Error deleting staff:', e);
+        return { error: 'Failed to delete staff. Please try again.' };
+    }
+}

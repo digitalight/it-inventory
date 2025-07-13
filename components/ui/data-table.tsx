@@ -43,23 +43,73 @@ export function DataTable<TData, TValue>({
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, columnId, filterValue) => {
-      // For laptops
-      const serialNumber = String(row.getValue("serialNumber") || "").toLowerCase()
-      const assignedTo = String(row.getValue("assignedTo") || "unassigned").toLowerCase()
-      
-      // For staff
-      const firstname = String(row.getValue("firstname") || "").toLowerCase()
-      const lastname = String(row.getValue("lastname") || "").toLowerCase()
-      const department = String(row.getValue("department") || "").toLowerCase()
-      
       const searchValue = String(filterValue).toLowerCase()
       
-      // Search across all relevant fields
-      return serialNumber.includes(searchValue) || 
-             assignedTo.includes(searchValue) ||
-             firstname.includes(searchValue) ||
-             lastname.includes(searchValue) ||
-             department.includes(searchValue)
+      // Get all column values safely
+      const values: string[] = []
+      
+      // Try to get common laptop fields
+      try {
+        const serialNumber = row.getValue("serialNumber")
+        if (serialNumber) values.push(String(serialNumber).toLowerCase())
+      } catch {}
+      
+      try {
+        const assignedTo = row.getValue("assignedTo")
+        if (assignedTo && typeof assignedTo === 'object') {
+          // Handle nested assignedTo object from laptops
+          const assignedToObj = assignedTo as { firstname?: string; lastname?: string; email?: string }
+          if (assignedToObj.firstname) values.push(String(assignedToObj.firstname).toLowerCase())
+          if (assignedToObj.lastname) values.push(String(assignedToObj.lastname).toLowerCase())
+          if (assignedToObj.email) values.push(String(assignedToObj.email).toLowerCase())
+          // Also add the full name
+          if (assignedToObj.firstname && assignedToObj.lastname) {
+            values.push(`${assignedToObj.firstname} ${assignedToObj.lastname}`.toLowerCase())
+          }
+        } else if (assignedTo) {
+          // Handle simple assignedTo string
+          values.push(String(assignedTo).toLowerCase())
+        }
+      } catch {}
+      
+      try {
+        const make = row.getValue("make")
+        if (make) values.push(String(make).toLowerCase())
+      } catch {}
+      
+      try {
+        const model = row.getValue("model")
+        if (model) values.push(String(model).toLowerCase())
+      } catch {}
+      
+      try {
+        const status = row.getValue("status")
+        if (status) values.push(String(status).toLowerCase())
+      } catch {}
+      
+      // Try to get common staff fields (for staff pages)
+      try {
+        const firstname = row.getValue("firstname")
+        if (firstname) values.push(String(firstname).toLowerCase())
+      } catch {}
+      
+      try {
+        const lastname = row.getValue("lastname")
+        if (lastname) values.push(String(lastname).toLowerCase())
+      } catch {}
+      
+      try {
+        const department = row.getValue("department")
+        if (department) values.push(String(department).toLowerCase())
+      } catch {}
+      
+      try {
+        const email = row.getValue("email")
+        if (email) values.push(String(email).toLowerCase())
+      } catch {}
+      
+      // Search across all available values
+      return values.some(value => value.includes(searchValue))
     },
     state: {
       sorting,
@@ -75,6 +125,7 @@ export function DataTable<TData, TValue>({
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
+          type="text"
         />
         <Button 
           variant="outline" 
