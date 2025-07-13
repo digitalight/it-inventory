@@ -3,7 +3,7 @@ import { getDashboardStats, getLeavingStaff } from './dashboard/actions';
 import { DashboardCard } from '@/components/dashboard-card';
 import { DataTable } from '@/components/ui/data-table';
 import { leavingStaffColumns } from '@/components/leaving-staff-columns';
-import { Laptop, Users } from 'lucide-react';
+import { Laptop, Users, Package } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Dashboard Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
         <DashboardCard
           title="Laptops Assigned"
           value={stats.assignedLaptops}
@@ -56,6 +56,22 @@ export default async function DashboardPage() {
           iconName="alertTriangle"
           className="border-red-200 bg-red-50"
         />
+        
+        <DashboardCard
+          title="Total Parts"
+          value={stats.totalParts}
+          description="Parts in inventory"
+          iconName="package"
+          className="border-purple-200 bg-purple-50"
+        />
+        
+        <DashboardCard
+          title="Parts Out of Stock"
+          value={stats.outOfStockCount}
+          description="Need immediate restocking"
+          iconName="alertTriangle"
+          className="border-red-200 bg-red-50"
+        />
       </div>
 
       {/* Bottom Section - Grid with Quick Actions and Leaving Staff */}
@@ -76,6 +92,12 @@ export default async function DashboardPage() {
                 <Button variant="ghost" className="w-full justify-start">
                   <Users className="mr-2 h-4 w-4" />
                   View All Staff
+                </Button>
+              </Link>
+              <Link href="/parts">
+                <Button variant="ghost" className="w-full justify-start">
+                  <Package className="mr-2 h-4 w-4" />
+                  View Parts Inventory
                 </Button>
               </Link>
             </div>

@@ -2,6 +2,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { PartsManager } from '@/lib/parts-management';
 
 export async function getDashboardStats() {
   try {
@@ -52,12 +53,16 @@ export async function getDashboardStats() {
       }
     });
 
+    // Parts stats
+    const partsStats = await PartsManager.getPartsStats();
+
     return {
       assignedLaptops,
       currentStaff,
       laptopsInRepair,
       laptopsWithLeavingStaff,
-      returnedLaptops
+      returnedLaptops,
+      ...partsStats
     };
   } catch (error) {
     console.error("Failed to fetch dashboard stats:", error);
@@ -66,7 +71,11 @@ export async function getDashboardStats() {
       currentStaff: 0,
       laptopsInRepair: 0,
       laptopsWithLeavingStaff: 0,
-      returnedLaptops: 0
+      returnedLaptops: 0,
+      totalParts: 0,
+      outOfStockCount: 0,
+      lowStockCount: 0,
+      totalCategories: 0
     };
   }
 }

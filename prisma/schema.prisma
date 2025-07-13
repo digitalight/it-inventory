@@ -69,3 +69,47 @@ model LaptopAssignmentHistory {
   assignedBy   String?  // who made the assignment
   notes        String?  // additional notes
 }
+
+// Parts inventory system
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  parts       Part[]
+}
+
+model Part {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  stockLevel   Int      @default(0)
+  minStockLevel Int     @default(0) // Alert when stock goes below this
+  location     String?  // Where the part is stored
+  partNumber   String?  // Manufacturer part number
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Audit trail
+  stockHistory PartStockHistory[]
+}
+
+// Audit table for part stock changes
+model PartStockHistory {
+  id          String   @id @default(uuid())
+  partId      String
+  part        Part     @relation(fields: [partId], references: [id], onDelete: Cascade)
+  changeType  String   // "IN", "OUT", "ADJUSTMENT"
+  quantity    Int      // positive for additions, negative for removals
+  previousStock Int
+  newStock    Int
+  reason      String?  // reason for stock change
+  changedBy   String?  // who made the change
+  changedAt   DateTime @default(now())
+  notes       String?  // additional notes
+}

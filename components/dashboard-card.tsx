@@ -1,13 +1,13 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Laptop, Users, Wrench, AlertTriangle } from "lucide-react"
+import { Laptop, Users, Wrench, AlertTriangle, Package } from "lucide-react"
 
 interface DashboardCardProps {
   title: string
   value: number
   description: string
-  iconName: 'laptop' | 'users' | 'wrench' | 'alertTriangle'
+  iconName: 'laptop' | 'users' | 'wrench' | 'alertTriangle' | 'package'
   className?: string
 }
 
@@ -28,6 +28,8 @@ export function DashboardCard({
         return Wrench
       case 'alertTriangle':
         return AlertTriangle
+      case 'package':
+        return Package
       default:
         return Laptop
     }

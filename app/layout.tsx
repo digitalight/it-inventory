@@ -36,6 +36,9 @@ export default function RootLayout({
               <Link href="/staff" passHref>
                 <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Staff</Button>
               </Link>
+              <Link href="/parts" passHref>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Parts</Button>
+              </Link>
               {/* You can add more navigation links here later, e.g., for staff */}
             </div>
           </div>
