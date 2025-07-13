@@ -35,10 +35,10 @@ export default async function DashboardPage() {
         />
         
         <DashboardCard
-          title="Current Staff"
-          value={stats.currentStaff}
-          description="Active staff members"
-          iconName="users"
+          title="Laptops Available"
+          value={stats.availableLaptops}
+          description="Ready for assignment"
+          iconName="laptop"
           className="border-green-200 bg-green-50"
         />
         
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
         />
         
         <DashboardCard
-          title="Departing Staff Laptops"
+          title="Return Laptops"
           value={stats.laptopsWithLeavingStaff}
           description="Staff leaving in next 3 months"
           iconName="alertTriangle"
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
         />
         
         <DashboardCard
-          title="Parts Out of Stock"
+          title="Out of Stock"
           value={stats.outOfStockCount}
           description="Need immediate restocking"
           iconName="alertTriangle"

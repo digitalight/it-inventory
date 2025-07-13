@@ -1,6 +1,7 @@
 // components/laptop-list.tsx
 import { Laptop, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 interface LaptopListProps {
   laptops: Array<{
@@ -36,7 +37,12 @@ export function LaptopList({ laptops, emptyMessage }: LaptopListProps) {
             <Laptop className="h-4 w-4 text-gray-500" />
             <div>
               <div className="font-medium text-sm">
-                {laptop.make} {laptop.model}
+                <Link 
+                  href={`/laptops/${laptop.id}`}
+                  className="hover:text-blue-600 hover:underline transition-colors cursor-pointer"
+                >
+                  {laptop.make} {laptop.model}
+                </Link>
               </div>
               <div className="text-xs text-gray-500">#{laptop.serialNumber}</div>
               {laptop.assignedTo && (

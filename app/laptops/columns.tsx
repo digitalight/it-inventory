@@ -25,6 +25,8 @@ import EditLaptopForm from "./edit-laptop-form"
 import { deleteLaptop } from "./actions"
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
 import { LaptopHistoryModal } from "@/components/laptop-history-modal"
+import { WipeLaptopModal } from "@/components/wipe-laptop-modal"
+import { CompleteRepairModal } from "@/components/complete-repair-modal"
 import Link from "next/link"
 
 // Actions cell component
@@ -32,6 +34,8 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const [wipeModalOpen, setWipeModalOpen] = useState(false)
+  const [repairModalOpen, setRepairModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
@@ -78,6 +82,22 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
           <DropdownMenuItem onClick={() => setHistoryModalOpen(true)}>
             View History
           </DropdownMenuItem>
+          {laptop.status === 'In Repair' && (
+            <DropdownMenuItem 
+              onClick={() => setRepairModalOpen(true)}
+              className="text-green-600"
+            >
+              Complete Repair
+            </DropdownMenuItem>
+          )}
+          {laptop.status === 'Returned' && (
+            <DropdownMenuItem 
+              onClick={() => setWipeModalOpen(true)}
+              className="text-blue-600"
+            >
+              Wiped
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem 
             className="text-red-600"
             onClick={() => setDeleteModalOpen(true)}
@@ -122,6 +142,23 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         laptopName={`${laptop.make} ${laptop.model}`}
         isOpen={historyModalOpen}
         onClose={() => setHistoryModalOpen(false)}
+      />
+
+      {/* Wipe Confirmation Modal */}
+      <WipeLaptopModal
+        isOpen={wipeModalOpen}
+        onClose={() => setWipeModalOpen(false)}
+        laptopId={laptop.id}
+        laptopName={`${laptop.make} ${laptop.model}`}
+      />
+
+      {/* Complete Repair Modal */}
+      <CompleteRepairModal
+        isOpen={repairModalOpen}
+        onClose={() => setRepairModalOpen(false)}
+        laptopId={laptop.id}
+        laptopName={`${laptop.make} ${laptop.model}`}
+        hasAssignment={!!laptop.assignedToId}
       />
     </>
   )

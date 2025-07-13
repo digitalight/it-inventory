@@ -5,6 +5,8 @@ import { LaptopManager } from '@/lib/laptop-management';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { WipeLaptopButton } from '@/components/wipe-laptop-button';
+import { CompleteRepairButton } from '@/components/complete-repair-button';
 import { ArrowLeft, Calendar, User, Settings, Laptop } from 'lucide-react';
 import Link from 'next/link';
 
@@ -153,9 +155,22 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
             <p className="text-gray-600">Serial Number: {laptop.serialNumber}</p>
           </div>
         </div>
-        <Badge variant={getStatusBadgeVariant(laptop.status)} className="text-lg px-4 py-2">
-          {laptop.status}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <CompleteRepairButton 
+            laptopId={laptop.id}
+            laptopName={`${laptop.make} ${laptop.model}`}
+            status={laptop.status}
+            hasAssignment={!!laptop.assignedToId}
+          />
+          <WipeLaptopButton 
+            laptopId={laptop.id}
+            laptopName={`${laptop.make} ${laptop.model}`}
+            status={laptop.status}
+          />
+          <Badge variant={getStatusBadgeVariant(laptop.status)} className="text-lg px-4 py-2">
+            {laptop.status}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

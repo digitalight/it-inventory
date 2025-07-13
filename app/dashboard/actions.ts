@@ -13,13 +13,10 @@ export async function getDashboardStats() {
       }
     });
 
-    // Card 2: Number of current staff (not leaving or leaving date is in the future)
-    const currentStaff = await prisma.staff.count({
+    // Card 2: Number of available laptops (ready for assignment)
+    const availableLaptops = await prisma.laptop.count({
       where: {
-        OR: [
-          { leavingDate: null },
-          { leavingDate: { gt: new Date() } }
-        ]
+        status: 'Available'
       }
     });
 
@@ -58,7 +55,7 @@ export async function getDashboardStats() {
 
     return {
       assignedLaptops,
-      currentStaff,
+      availableLaptops,
       laptopsInRepair,
       laptopsWithLeavingStaff,
       returnedLaptops,
@@ -68,7 +65,7 @@ export async function getDashboardStats() {
     console.error("Failed to fetch dashboard stats:", error);
     return {
       assignedLaptops: 0,
-      currentStaff: 0,
+      availableLaptops: 0,
       laptopsInRepair: 0,
       laptopsWithLeavingStaff: 0,
       returnedLaptops: 0,
