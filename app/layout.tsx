@@ -25,7 +25,7 @@ export default function RootLayout({
         <nav className="bg-gradient-to-r from-blue-700 to-indigo-800 p-4 text-white shadow-lg">
           <div className="container mx-auto flex justify-between items-center">
             <Link href="/" passHref>
-              <span className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors">Laptop Tracker</span>
+              <span className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors">IT Inventory</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link href="/" passHref>
