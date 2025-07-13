@@ -2,7 +2,7 @@
 "use client" // This file needs to be a Client Component for interactivity
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,11 +24,13 @@ import { toast } from "sonner"
 import EditLaptopForm from "./edit-laptop-form"
 import { deleteLaptop } from "./actions"
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
+import { LaptopHistoryModal } from "@/components/laptop-history-modal"
 
 // Actions cell component
 function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
@@ -67,6 +69,9 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
           <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
             Edit Laptop
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setHistoryModalOpen(true)}>
+            View History
+          </DropdownMenuItem>
           <DropdownMenuItem 
             className="text-red-600"
             onClick={() => setDeleteModalOpen(true)}
@@ -103,6 +108,14 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         description="Are you sure you want to delete this laptop? This will remove it from the inventory system."
         itemName={`${laptop.make} ${laptop.model} (${laptop.serialNumber})`}
         isDeleting={isDeleting}
+      />
+
+      {/* History Modal */}
+      <LaptopHistoryModal
+        laptopId={laptop.id}
+        laptopName={`${laptop.make} ${laptop.model}`}
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
       />
     </>
   )
@@ -179,6 +192,9 @@ export const columns: ColumnDef<LaptopWithStaff>[] = [
         case 'Retired':
           statusColorClass = 'text-red-500 font-medium';
           break;
+        case 'Returned':
+          statusColorClass = 'text-orange-500 font-medium';
+          break;
         default:
           statusColorClass = '';
       }
@@ -199,6 +215,25 @@ export const columns: ColumnDef<LaptopWithStaff>[] = [
         </div>
       )
     }
+  },
+  {
+    id: "history",
+    header: "History",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const laptop = row.original;
+      return (
+        <LaptopHistoryModal
+          laptopId={laptop.id}
+          laptopName={`${laptop.make} ${laptop.model}`}
+          triggerButton={
+            <Button variant="ghost" size="sm">
+              <History className="h-4 w-4" />
+            </Button>
+          }
+        />
+      );
+    },
   },
   {
     id: "actions",

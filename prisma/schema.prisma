@@ -14,12 +14,16 @@ model Laptop {
   make         String
   model        String
   serialNumber String    @unique // This is crucial for consistency!
-  status       String    @default("Available") // "Available", "Assigned", "In Repair", "Retired"
+  status       String    @default("Available") // "Available", "Assigned", "In Repair", "Retired", "Returned"
   assignedToId String?   // Foreign key to Staff
   assignedTo   Staff?    @relation(fields: [assignedToId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   returnDate   DateTime? // Optional: for offboarding planning
+  
+  // Audit trail relationships
+  statusHistory LaptopStatusHistory[]
+  assignmentHistory LaptopAssignmentHistory[]
 }
 
 model Staff {
@@ -34,4 +38,34 @@ model Staff {
   updatedAt    DateTime  @updatedAt
   startDate    DateTime  @default(now())
   leavingDate  DateTime?
+  
+  // Audit trail relationships
+  assignmentHistory LaptopAssignmentHistory[]
+}
+
+// Audit table for laptop status changes
+model LaptopStatusHistory {
+  id          String   @id @default(uuid())
+  laptopId    String
+  laptop      Laptop   @relation(fields: [laptopId], references: [id], onDelete: Cascade)
+  fromStatus  String?  // null for initial status
+  toStatus    String
+  reason      String?  // optional reason for status change
+  changedBy   String?  // who made the change (could be email or name)
+  changedAt   DateTime @default(now())
+  notes       String?  // additional notes about the change
+}
+
+// Audit table for laptop assignments
+model LaptopAssignmentHistory {
+  id           String   @id @default(uuid())
+  laptopId     String
+  laptop       Laptop   @relation(fields: [laptopId], references: [id], onDelete: Cascade)
+  staffId      String?  // null when unassigned
+  staff        Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  assignedAt   DateTime @default(now())
+  unassignedAt DateTime? // null if currently assigned
+  reason       String?  // reason for assignment/unassignment
+  assignedBy   String?  // who made the assignment
+  notes        String?  // additional notes
 }

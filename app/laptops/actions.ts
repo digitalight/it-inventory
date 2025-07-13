@@ -3,6 +3,7 @@
 
 import { prisma } from '@/lib/prisma'; // Import your singleton Prisma client
 import { revalidatePath } from 'next/cache'; // To refresh data after changes
+import { LaptopManager, LaptopStatus } from '@/lib/laptop-management';
 
 export async function getLaptops() {
     try {
@@ -220,7 +221,7 @@ export async function updateLaptop(formData: FormData) {
   const make = formData.get('make') as string;
   const model = formData.get('model') as string;
   const serialNumber = formData.get('serialNumber') as string;
-  const status = formData.get('status') as string;
+  const status = formData.get('status') as LaptopStatus;
   const assignedToEmail = formData.get('assignedTo') as string | null;
 
   if (!id || !make || !model || !serialNumber || !status) {
@@ -228,10 +229,25 @@ export async function updateLaptop(formData: FormData) {
   }
 
   try {
+    // Get current laptop to check current state
+    const currentLaptop = await prisma.laptop.findUnique({
+      where: { id },
+      include: { assignedTo: true }
+    });
+
+    if (!currentLaptop) {
+      return { error: 'Laptop not found.' };
+    }
+
     let assignedToId = null;
     
-    // If email is provided, find or create the staff member
+    // Handle assignment logic
     if (assignedToEmail && assignedToEmail.trim()) {
+      // If status is 'Returned', don't allow assignment
+      if (status === 'Returned') {
+        return { error: 'Cannot assign a laptop with "Returned" status. Please set to "Available" after wiping.' };
+      }
+
       const existingStaff = await prisma.staff.findUnique({
         where: { email: assignedToEmail.trim() }
       });
@@ -252,16 +268,42 @@ export async function updateLaptop(formData: FormData) {
       }
     }
 
+    // If we have a status change, use the business logic
+    if (currentLaptop.status !== status) {
+      try {
+        await LaptopManager.updateLaptopStatus(id, status);
+      } catch (validationError) {
+        return { error: (validationError as Error).message };
+      }
+    }
+
+    // Update the basic laptop information (make, model, serialNumber)
+    // Note: assignedToId will be handled by the status logic above
+    const updateData: {
+      make: string;
+      model: string;
+      serialNumber: string;
+      assignedToId?: string | null;
+      status?: string;
+    } = {
+      make,
+      model,
+      serialNumber,
+    };
+
+    // Only update assignment if status allows it and we have a valid assignment
+    if (assignedToId && !['Returned', 'Retired'].includes(status)) {
+      updateData.assignedToId = assignedToId;
+      updateData.status = 'Assigned'; // Force status to Assigned if we're assigning
+    } else if (!assignedToId && ['Available', 'In Repair'].includes(status)) {
+      updateData.assignedToId = null;
+    }
+
     await prisma.laptop.update({
       where: { id },
-      data: {
-        make,
-        model,
-        serialNumber,
-        status,
-        assignedToId,
-      },
+      data: updateData,
     });
+
     revalidatePath('/laptops');
     return { success: true };
   } catch (e: unknown) {

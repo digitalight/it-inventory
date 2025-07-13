@@ -94,13 +94,17 @@ export default async function DashboardPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Total Laptops</span>
-                <span className="font-semibold">{stats.assignedLaptops + stats.laptopsInRepair}</span>
+                <span className="font-semibold">{stats.assignedLaptops + stats.laptopsInRepair + stats.returnedLaptops}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Available Laptops</span>
                 <span className="font-semibold text-green-600">
-                  {Math.max(0, stats.assignedLaptops - stats.laptopsInRepair)}
+                  {Math.max(0, stats.assignedLaptops - stats.laptopsInRepair - stats.returnedLaptops)}
                 </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Returned (Awaiting Wipe)</span>
+                <span className="font-semibold text-orange-600">{stats.returnedLaptops}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">System Health</span>

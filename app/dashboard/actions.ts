@@ -45,11 +45,19 @@ export async function getDashboardStats() {
       }
     });
 
+    // Additional metric: Returned laptops (awaiting wiping)
+    const returnedLaptops = await prisma.laptop.count({
+      where: {
+        status: 'Returned'
+      }
+    });
+
     return {
       assignedLaptops,
       currentStaff,
       laptopsInRepair,
-      laptopsWithLeavingStaff
+      laptopsWithLeavingStaff,
+      returnedLaptops
     };
   } catch (error) {
     console.error("Failed to fetch dashboard stats:", error);
@@ -57,7 +65,8 @@ export async function getDashboardStats() {
       assignedLaptops: 0,
       currentStaff: 0,
       laptopsInRepair: 0,
-      laptopsWithLeavingStaff: 0
+      laptopsWithLeavingStaff: 0,
+      returnedLaptops: 0
     };
   }
 }

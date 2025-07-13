@@ -76,6 +76,7 @@ export default function EditLaptopForm({
             <SelectItem value="Available">Available</SelectItem>
             <SelectItem value="Assigned">Assigned</SelectItem>
             <SelectItem value="In Repair">In Repair</SelectItem>
+            <SelectItem value="Returned">Returned</SelectItem>
             <SelectItem value="Retired">Retired</SelectItem>
           </SelectContent>
         </Select>

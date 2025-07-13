@@ -58,6 +58,7 @@ export default function AddLaptopForm({ onSuccess }: { onSuccess?: () => void })
             <SelectItem value="Available">Available</SelectItem>
             <SelectItem value="Assigned">Assigned</SelectItem>
             <SelectItem value="In Repair">In Repair</SelectItem>
+            <SelectItem value="Returned">Returned</SelectItem>
             <SelectItem value="Retired">Retired</SelectItem>
           </SelectContent>
         </Select>
