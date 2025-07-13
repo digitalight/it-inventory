@@ -25,6 +25,7 @@ import EditLaptopForm from "./edit-laptop-form"
 import { deleteLaptop } from "./actions"
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
 import { LaptopHistoryModal } from "@/components/laptop-history-modal"
+import Link from "next/link"
 
 // Actions cell component
 function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
@@ -57,6 +58,11 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem asChild>
+            <Link href={`/laptops/${laptop.id}`}>
+              View Details
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
               navigator.clipboard.writeText(laptop.serialNumber);
@@ -154,10 +160,32 @@ export const columns: ColumnDef<LaptopWithStaff>[] = [
           </Button>
         );
     },
+    cell: ({ row }) => {
+      const laptop = row.original;
+      return (
+        <Link 
+          href={`/laptops/${laptop.id}`}
+          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+        >
+          {laptop.make}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "model",
     header: "Model",
+    cell: ({ row }) => {
+      const laptop = row.original;
+      return (
+        <Link 
+          href={`/laptops/${laptop.id}`}
+          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+        >
+          {laptop.model}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "serialNumber",

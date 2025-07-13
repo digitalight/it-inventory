@@ -25,11 +25,13 @@ import { Button } from "@/components/ui/button"
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  showSearch?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  showSearch = true,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState("")
@@ -119,26 +121,28 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4 gap-4">
-        <Input
-          placeholder="Search laptops/staff..."
-          value={globalFilter ?? ""}
-          onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
-          type="text"
-        />
-        <Button 
-          variant="outline" 
-          onClick={() => setGlobalFilter("")}
-          className="px-3"
-        >
-          Clear Search
-        </Button>
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} of{" "}
-          {table.getCoreRowModel().rows.length} laptop(s) shown
+      {showSearch && (
+        <div className="flex items-center py-4 gap-4">
+          <Input
+            placeholder="Search laptops/staff..."
+            value={globalFilter ?? ""}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className="max-w-sm"
+            type="text"
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => setGlobalFilter("")}
+            className="px-3"
+          >
+            Clear Search
+          </Button>
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length} of{" "}
+            {table.getCoreRowModel().rows.length} laptop(s) shown
+          </div>
         </div>
-      </div>
+      )}
       <div className="rounded-md border">
       <Table>
         <TableHeader>

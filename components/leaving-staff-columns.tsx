@@ -3,6 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { ReturnLaptopButton } from "@/components/return-laptop-button";
 
 // Define the type for leaving staff with laptops
 export type LeavingStaffWithLaptops = {
@@ -98,6 +99,32 @@ export const leavingStaffColumns: ColumnDef<LeavingStaffWithLaptops>[] = [
                 SN: {laptop.serialNumber}
               </div>
             </div>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const staff = row.original;
+      const laptops = staff.laptops;
+      
+      if (laptops.length === 0) {
+        return <span className="text-muted-foreground text-sm">No laptops</span>;
+      }
+      
+      return (
+        <div className="space-y-1">
+          {laptops.map((laptop) => (
+            <ReturnLaptopButton
+              key={laptop.id}
+              laptopId={laptop.id}
+              staffId={staff.id}
+              laptopInfo={`${laptop.make} ${laptop.model} (SN: ${laptop.serialNumber})`}
+              staffName={`${staff.firstname} ${staff.lastname}`}
+            />
           ))}
         </div>
       );
