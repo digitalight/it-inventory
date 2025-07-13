@@ -11,6 +11,7 @@ This directory contains templates for generating printable order documents.
 ## Available Template Variables
 
 ### Order Information
+
 - `{orderName}` - Name of the order
 - `{orderId}` - Unique order ID
 - `{orderDate}` - Date the order was created
@@ -18,6 +19,7 @@ This directory contains templates for generating printable order documents.
 - `{status}` - Current order status
 
 ### Supplier Information
+
 - `{supplierName}` - Name of the supplier
 - `{supplierContact}` - Contact person at supplier
 - `{supplierEmail}` - Supplier email address
@@ -25,14 +27,17 @@ This directory contains templates for generating printable order documents.
 - `{supplierAddress}` - Supplier address
 
 ### Financial Information
+
 - `{deliveryCost}` - Cost of delivery
 - `{subtotal}` - Total before delivery cost
 - `{totalAmount}` - Final total amount
 
 ### Notes
+
 - `{notes}` - Additional order notes
 
 ### Order Items (Table Loop)
+
 For creating a table of order items, use:
 
 ```
@@ -81,10 +86,13 @@ NOTES
 ```
 
 ## File Location
+
 Place your template file at: `public/templates/order-template.docx`
 
 ## Testing
+
 Once your template is ready, you can test it by:
+
 1. Creating or editing an order
 2. Using the "Print Order" button in the actions menu
 3. Or using the print button next to uploaded documents
