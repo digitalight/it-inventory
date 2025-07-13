@@ -1,0 +1,165 @@
+// app/staff/actions.ts
+'use server'; // THIS IS CRUCIAL - tells Next.js these functions run on the server
+
+import { prisma } from '@/lib/prisma'; // Import your singleton Prisma client
+import { revalidatePath } from 'next/cache'; // To refresh data after changes
+
+export async function getStaff() {
+    try {
+        const staff = await prisma.staff.findMany({
+            orderBy: {
+                createdAt: 'desc', // Show newest staff first
+            },
+        });
+        return staff;
+    } catch (error) {
+        console.error("Failed to fetch staff:", error);
+        return []; // Return empty array on error
+    }
+}
+
+export async function addStaff(formData: FormData) {
+    const firstname = formData.get('firstname') as string;
+    const lastname = formData.get('lastname') as string;
+    const department = formData.get('department') as string;
+    const isteacher = formData.get('isteacher') === 'true';
+    const startDate = formData.get('startDate') as string;
+    const leavingDate = formData.get('leavingDate') as string;
+
+    if (!firstname || !lastname) {
+        return { error: 'First name and last name are required.' };
+    }
+
+    try {
+        await prisma.staff.create({
+            data: {
+                firstname,
+                lastname,
+                department: department || null,
+                isteacher,
+                startDate: startDate ? new Date(startDate) : new Date(),
+                leavingDate: leavingDate ? new Date(leavingDate) : null,
+            },
+        });
+        revalidatePath('/staff'); // Tell Next.js to refresh the /staff page's data
+        return { success: true };
+    } catch (e: unknown) {
+        console.error('Error adding staff:', e);
+        return { error: 'Failed to add staff member. Please try again.' };
+    }
+}
+
+export async function importStaffFromCSV(formData: FormData) {
+    const file = formData.get('csvFile') as File;
+    
+    if (!file) {
+        return { error: 'No file selected.' };
+    }
+
+    if (!file.name.endsWith('.csv')) {
+        return { error: 'Please select a CSV file.' };
+    }
+
+    try {
+        const text = await file.text();
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        if (lines.length < 2) {
+            return { error: 'CSV file must contain a header row and at least one data row.' };
+        }
+
+        // Parse header row (case-insensitive)
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const requiredHeaders = ['firstname', 'lastname'];
+        const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+        
+        if (missingHeaders.length > 0) {
+            return { error: `Missing required columns: ${missingHeaders.join(', ')}. Required: firstname, lastname` };
+        }
+
+        // Get column indices
+        const firstnameIndex = headers.indexOf('firstname');
+        const lastnameIndex = headers.indexOf('lastname');
+        const departmentIndex = headers.indexOf('department');
+        const isteacherIndex = headers.indexOf('isteacher');
+        const startDateIndex = headers.indexOf('startdate');
+        const leavingDateIndex = headers.indexOf('leavingdate');
+
+        let imported = 0;
+        let updated = 0;
+        const errors: string[] = [];
+
+        // Process each data row
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].split(',').map(cell => cell.trim());
+            
+            if (row.length < requiredHeaders.length) {
+                errors.push(`Row ${i + 1}: Insufficient columns`);
+                continue;
+            }
+
+            const firstname = row[firstnameIndex];
+            const lastname = row[lastnameIndex];
+            const department = departmentIndex >= 0 ? row[departmentIndex] || null : null;
+            const isteacher = isteacherIndex >= 0 ? row[isteacherIndex]?.toLowerCase() === 'true' : false;
+            const startDate = startDateIndex >= 0 && row[startDateIndex] ? new Date(row[startDateIndex]) : new Date();
+            const leavingDate = leavingDateIndex >= 0 && row[leavingDateIndex] ? new Date(row[leavingDateIndex]) : null;
+
+            if (!firstname || !lastname) {
+                errors.push(`Row ${i + 1}: Missing required fields (firstname, lastname)`);
+                continue;
+            }
+
+            // Check if staff member already exists (by firstname + lastname combination)
+            const existingStaff = await prisma.staff.findFirst({
+                where: { 
+                    firstname,
+                    lastname
+                }
+            });
+
+            try {
+                if (existingStaff) {
+                    // Update existing staff member
+                    await prisma.staff.update({
+                        where: { id: existingStaff.id },
+                        data: {
+                            department,
+                            isteacher,
+                            startDate,
+                            leavingDate,
+                        }
+                    });
+                    updated++;
+                } else {
+                    // Create new staff member
+                    await prisma.staff.create({
+                        data: {
+                            firstname,
+                            lastname,
+                            department,
+                            isteacher,
+                            startDate,
+                            leavingDate,
+                        }
+                    });
+                    imported++;
+                }
+            } catch (error) {
+                errors.push(`Row ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+        }
+
+        revalidatePath('/staff');
+        
+        let message = `Import completed: ${imported} new staff members added, ${updated} staff members updated`;
+        if (errors.length > 0) {
+            message += `. ${errors.length} errors: ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? '...' : ''}`;
+        }
+
+        return { success: true, message, imported, updated, errors };
+    } catch (error) {
+        console.error('CSV import error:', error);
+        return { error: 'Failed to process CSV file. Please check the file format.' };
+    }
+}

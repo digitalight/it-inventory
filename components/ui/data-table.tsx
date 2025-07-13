@@ -43,11 +43,23 @@ export function DataTable<TData, TValue>({
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, columnId, filterValue) => {
+      // For laptops
       const serialNumber = String(row.getValue("serialNumber") || "").toLowerCase()
       const assignedTo = String(row.getValue("assignedTo") || "unassigned").toLowerCase()
+      
+      // For staff
+      const firstname = String(row.getValue("firstname") || "").toLowerCase()
+      const lastname = String(row.getValue("lastname") || "").toLowerCase()
+      const department = String(row.getValue("department") || "").toLowerCase()
+      
       const searchValue = String(filterValue).toLowerCase()
       
-      return serialNumber.includes(searchValue) || assignedTo.includes(searchValue)
+      // Search across all relevant fields
+      return serialNumber.includes(searchValue) || 
+             assignedTo.includes(searchValue) ||
+             firstname.includes(searchValue) ||
+             lastname.includes(searchValue) ||
+             department.includes(searchValue)
     },
     state: {
       sorting,
@@ -59,7 +71,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4 gap-4">
         <Input
-          placeholder="Search by serial number or assigned to..."
+          placeholder="Search laptops/staff..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"

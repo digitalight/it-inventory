@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner'; // Make sure this is imported
 import { AddLaptopModal } from '@/components/add-laptop-modal';
+import { AddStaffModal } from '@/components/add-staff-modal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,8 +30,12 @@ export default function RootLayout({
             </Link>
             <div className="flex items-center space-x-4">
               <AddLaptopModal />
+              <AddStaffModal />
               <Link href="/laptops" passHref>
                 <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Laptops</Button>
+              </Link>
+              <Link href="/staff" passHref>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Staff</Button>
               </Link>
               {/* You can add more navigation links here later, e.g., for staff */}
             </div>

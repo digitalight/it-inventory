@@ -1,0 +1,6 @@
+firstname,lastname,department,isteacher,startdate,leavingdate
+John,Smith,Mathematics,true,2023-08-15,
+Jane,Doe,Science,true,2022-09-01,
+Bob,Johnson,Administration,false,2021-06-01,
+Alice,Williams,English,true,2023-01-10,
+Mike,Brown,IT Support,false,2020-03-15,2025-12-31
