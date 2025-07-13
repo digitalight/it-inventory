@@ -20,14 +20,7 @@ export default async function DashboardPage() {
           <h1 className="text-4xl font-extrabold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-2">Overview of your IT inventory system</p>
         </div>
-        <div className="flex gap-3">
-          <Link href="/laptops">
-            <Button variant="outline">Manage Laptops</Button>
-          </Link>
-          <Link href="/staff">
-            <Button variant="outline">Manage Staff</Button>
-          </Link>
-        </div>
+        
       </div>
 
       {/* Dashboard Cards */}
