@@ -11,14 +11,7 @@ export default async function LaptopsPage() {
       <h1 className="text-4xl font-extrabold mb-8 text-center">Laptop Inventory System</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Placeholder for CSV import - we'll add this later */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-6 border-b pb-3">Import from CSV (Coming Soon!)</h2>
-          <p className="text-gray-600">
-            You&apos;ll be able to upload a CSV file here to add multiple laptops at once.
-            Focus on manual entry first!
-          </p>
-        </div>
+        
 
          {/* Placeholder for Offboarding - we'll add this later */}
         <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
