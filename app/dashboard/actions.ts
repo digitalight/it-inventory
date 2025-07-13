@@ -110,3 +110,57 @@ export async function getLeavingStaff() {
     return [];
   }
 }
+
+export async function getLaptopsInRepair() {
+  try {
+    const laptopsInRepair = await prisma.laptop.findMany({
+      where: {
+        status: 'In Repair'
+      },
+      include: {
+        assignedTo: {
+          select: {
+            firstname: true,
+            lastname: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+
+    return laptopsInRepair;
+  } catch (error) {
+    console.error("Failed to fetch laptops in repair:", error);
+    return [];
+  }
+}
+
+export async function getLaptopsForWiping() {
+  try {
+    const laptopsForWiping = await prisma.laptop.findMany({
+      where: {
+        status: 'Returned'
+      },
+      include: {
+        assignedTo: {
+          select: {
+            firstname: true,
+            lastname: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+
+    return laptopsForWiping;
+  } catch (error) {
+    console.error("Failed to fetch laptops for wiping:", error);
+    return [];
+  }
+}

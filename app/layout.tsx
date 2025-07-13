@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner'; // Make sure this is imported
+import { Home, Laptop, Users, Cable } from 'lucide-react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,16 +29,28 @@ export default function RootLayout({
             </Link>
             <div className="flex items-center space-x-4">
               <Link href="/" passHref>
-                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Dashboard</Button>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Dashboard
+                </Button>
               </Link>
               <Link href="/laptops" passHref>
-                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Laptops</Button>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
+                  <Laptop className="h-4 w-4" />
+                  Laptops
+                </Button>
               </Link>
               <Link href="/staff" passHref>
-                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Staff</Button>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Staff
+                </Button>
               </Link>
               <Link href="/parts" passHref>
-                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors">Parts</Button>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
+                  <Cable className="h-4 w-4" />
+                  Parts
+                </Button>
               </Link>
               {/* You can add more navigation links here later, e.g., for staff */}
             </div>
