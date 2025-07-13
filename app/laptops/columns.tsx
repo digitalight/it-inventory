@@ -2,7 +2,6 @@
 "use client" // This file needs to be a Client Component for interactivity
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Laptop } from "@prisma/client" // Import your Laptop type
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +13,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export const columns: ColumnDef<Laptop>[] = [
+// Define the type for laptop with staff relationship
+type LaptopWithStaff = {
+  id: string
+  make: string
+  model: string
+  serialNumber: string
+  status: string
+  assignedToId: string | null
+  assignedTo: {
+    id: string
+    email: string
+    firstname: string
+    lastname: string
+  } | null
+  createdAt: Date
+  updatedAt: Date
+  returnDate: Date | null
+}
+
+export const columns: ColumnDef<LaptopWithStaff>[] = [
   {
     accessorKey: "make",
     header: ({ column }) => {
@@ -76,8 +94,15 @@ export const columns: ColumnDef<Laptop>[] = [
     accessorKey: "assignedTo",
     header: "Assigned To",
     cell: ({ row }) => {
-      const assignedTo = row.getValue("assignedTo")
-      return assignedTo || 'Unassigned' // Display 'Unassigned' if null
+      const assignedTo = row.original.assignedTo
+      if (!assignedTo) return 'Unassigned'
+      
+      return (
+        <div className="flex flex-col">
+          <span className="font-medium">{`${assignedTo.firstname} ${assignedTo.lastname}`}</span>
+          <span className="text-xs text-gray-500">{assignedTo.email}</span>
+        </div>
+      )
     }
   },
   {

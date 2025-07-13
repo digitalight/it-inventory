@@ -63,8 +63,8 @@ export default function AddLaptopForm({ onSuccess }: { onSuccess?: () => void })
         </Select>
       </div>
       <div>
-        <Label htmlFor="assignedTo">Assigned To (Optional)</Label>
-        <Input id="assignedTo" name="assignedTo" className="mt-1" />
+        <Label htmlFor="assignedTo">Assigned To Email (Optional)</Label>
+        <Input id="assignedTo" name="assignedTo" type="email" className="mt-1" placeholder="staff.member@school.edu" />
       </div>
       <SubmitButton />
     </form>

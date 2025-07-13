@@ -1,6 +1,6 @@
-make,model,serialnumber,status,assignedto
+make,model,serialnumber,status,assignedtoemail
 Apple,MacBook Pro,ABC123456,Available,
-Dell,Latitude 7420,DEF789012,Assigned,John Smith
+Dell,Latitude 7420,DEF789012,Assigned,john.smith@school.edu
 HP,EliteBook 840,GHI345678,In Repair,
 Lenovo,ThinkPad X1,JKL901234,Retired,
-Microsoft,Surface Laptop,MNO567890,Assigned,Jane Doe
+Microsoft,Surface Laptop,MNO567890,Assigned,jane.doe@school.edu

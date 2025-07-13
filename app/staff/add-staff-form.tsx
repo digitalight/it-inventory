@@ -36,6 +36,10 @@ export default function AddStaffForm({ onSuccess }: { onSuccess?: () => void }) 
 
   return (
     <form action={handleSubmit} ref={formRef} className="grid grid-cols-1 gap-4">
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" name="email" type="email" required className="mt-1" placeholder="staff.member@school.edu" />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="firstname">First Name</Label>

@@ -57,7 +57,7 @@ export default function ImportCSVForm({ onSuccess }: ImportCSVFormProps) {
           <li><strong>model</strong> - Laptop model</li>
           <li><strong>serialnumber</strong> - Unique serial number</li>
           <li><strong>status</strong> - Available, Assigned, In Repair, or Retired</li>
-          <li><strong>assignedto</strong> - Person assigned to (optional)</li>
+          <li><strong>assignedtoemail</strong> - Staff member&apos;s email (optional)</li>
         </ul>
         <p className="text-xs italic">
           Note: Existing laptops will be updated with new information.

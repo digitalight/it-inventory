@@ -15,7 +15,8 @@ model Laptop {
   model        String
   serialNumber String    @unique // This is crucial for consistency!
   status       String    @default("Available") // "Available", "Assigned", "In Repair", "Retired"
-  assignedTo   String?   // Name of staff member, can be null
+  assignedToId String?   // Foreign key to Staff
+  assignedTo   Staff?    @relation(fields: [assignedToId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   returnDate   DateTime? // Optional: for offboarding planning
@@ -23,10 +24,12 @@ model Laptop {
 
 model Staff {
   id           String   @id @default(uuid())
+  email        String   @unique // Add email as unique identifier
   firstname    String
   lastname     String
   department   String?
   isteacher    Boolean
+  laptops      Laptop[] // One-to-many relationship
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   startDate    DateTime  @default(now())

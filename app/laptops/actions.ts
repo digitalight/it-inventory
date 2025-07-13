@@ -7,14 +7,17 @@ import { revalidatePath } from 'next/cache'; // To refresh data after changes
 export async function getLaptops() {
     try {
         const laptops = await prisma.laptop.findMany({
-        orderBy: {
-        createdAt: 'desc', // Show newest laptops first
-        },
-    });
-    return laptops;
+            include: {
+                assignedTo: true, // Include the related staff member
+            },
+            orderBy: {
+                createdAt: 'desc', // Show newest laptops first
+            },
+        });
+        return laptops;
     } catch (error) {
-    console.error("Failed to fetch laptops:", error);
-    return []; // Return empty array on error
+        console.error("Failed to fetch laptops:", error);
+        return []; // Return empty array on error
     }
 }
 
@@ -23,20 +26,44 @@ export async function addLaptop(formData: FormData) {
   const model = formData.get('model') as string;
   const serialNumber = formData.get('serialNumber') as string;
   const status = formData.get('status') as string;
-  const assignedTo = formData.get('assignedTo') as string | null;
+  const assignedToEmail = formData.get('assignedTo') as string | null;
 
   if (!make || !model || !serialNumber || !status) {
     return { error: 'Missing required fields.' };
   }
 
   try {
+    let assignedToId = null;
+    
+    // If email is provided, find or create the staff member
+    if (assignedToEmail && assignedToEmail.trim()) {
+      const existingStaff = await prisma.staff.findUnique({
+        where: { email: assignedToEmail.trim() }
+      });
+      
+      if (existingStaff) {
+        assignedToId = existingStaff.id;
+      } else {
+        // Create basic staff record with email only
+        const newStaff = await prisma.staff.create({
+          data: {
+            email: assignedToEmail.trim(),
+            firstname: 'Unknown',
+            lastname: 'Staff',
+            isteacher: false,
+          }
+        });
+        assignedToId = newStaff.id;
+      }
+    }
+
     await prisma.laptop.create({
       data: {
         make,
         model,
         serialNumber,
         status,
-        assignedTo: assignedTo || null,
+        assignedToId,
       },
     });
     revalidatePath('/laptops'); // Tell Next.js to refresh the /laptops page's data
@@ -84,7 +111,7 @@ export async function importLaptopsFromCSV(formData: FormData) {
     const modelIndex = headers.indexOf('model');
     const serialNumberIndex = headers.indexOf('serialnumber');
     const statusIndex = headers.indexOf('status');
-    const assignedToIndex = headers.indexOf('assignedto'); // Optional column
+    const assignedToEmailIndex = headers.indexOf('assignedtoemail'); // Changed to email
 
     let imported = 0;
     let updated = 0;
@@ -103,11 +130,39 @@ export async function importLaptopsFromCSV(formData: FormData) {
       const model = row[modelIndex];
       const serialNumber = row[serialNumberIndex];
       const status = row[statusIndex];
-      const assignedTo = assignedToIndex >= 0 ? row[assignedToIndex] || null : null;
+      const assignedToEmail = assignedToEmailIndex >= 0 ? row[assignedToEmailIndex] || null : null;
 
       if (!make || !model || !serialNumber || !status) {
         errors.push(`Row ${i + 1}: Missing required fields`);
         continue;
+      }
+
+      // Handle staff assignment
+      let assignedToId = null;
+      if (assignedToEmail && assignedToEmail.trim()) {
+        const existingStaff = await prisma.staff.findUnique({
+          where: { email: assignedToEmail.trim() }
+        });
+        
+        if (existingStaff) {
+          assignedToId = existingStaff.id;
+        } else {
+          // Create basic staff record with email only
+          try {
+            const newStaff = await prisma.staff.create({
+              data: {
+                email: assignedToEmail.trim(),
+                firstname: 'Unknown',
+                lastname: 'Staff',
+                isteacher: false,
+              }
+            });
+            assignedToId = newStaff.id;
+          } catch {
+            errors.push(`Row ${i + 1}: Failed to create staff for email ${assignedToEmail}`);
+            continue;
+          }
+        }
       }
 
       // Check if laptop already exists
@@ -124,7 +179,7 @@ export async function importLaptopsFromCSV(formData: FormData) {
               make,
               model,
               status,
-              assignedTo: assignedTo || null,
+              assignedToId,
             }
           });
           updated++;
@@ -136,7 +191,7 @@ export async function importLaptopsFromCSV(formData: FormData) {
               model,
               serialNumber,
               status,
-              assignedTo: assignedTo || null,
+              assignedToId,
             }
           });
           imported++;

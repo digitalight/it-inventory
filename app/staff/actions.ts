@@ -7,6 +7,9 @@ import { revalidatePath } from 'next/cache'; // To refresh data after changes
 export async function getStaff() {
     try {
         const staff = await prisma.staff.findMany({
+            include: {
+                laptops: true, // Include assigned laptops
+            },
             orderBy: {
                 createdAt: 'desc', // Show newest staff first
             },
@@ -19,6 +22,7 @@ export async function getStaff() {
 }
 
 export async function addStaff(formData: FormData) {
+    const email = formData.get('email') as string;
     const firstname = formData.get('firstname') as string;
     const lastname = formData.get('lastname') as string;
     const department = formData.get('department') as string;
@@ -26,13 +30,14 @@ export async function addStaff(formData: FormData) {
     const startDate = formData.get('startDate') as string;
     const leavingDate = formData.get('leavingDate') as string;
 
-    if (!firstname || !lastname) {
-        return { error: 'First name and last name are required.' };
+    if (!email || !firstname || !lastname) {
+        return { error: 'Email, first name and last name are required.' };
     }
 
     try {
         await prisma.staff.create({
             data: {
+                email,
                 firstname,
                 lastname,
                 department: department || null,
@@ -44,6 +49,10 @@ export async function addStaff(formData: FormData) {
         revalidatePath('/staff'); // Tell Next.js to refresh the /staff page's data
         return { success: true };
     } catch (e: unknown) {
+        const error = e as { code?: string; message?: string };
+        if (error.code === 'P2002') { // Prisma error code for unique constraint violation
+            return { error: `A staff member with email "${email}" already exists.` };
+        }
         console.error('Error adding staff:', e);
         return { error: 'Failed to add staff member. Please try again.' };
     }
@@ -70,14 +79,15 @@ export async function importStaffFromCSV(formData: FormData) {
 
         // Parse header row (case-insensitive)
         const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-        const requiredHeaders = ['firstname', 'lastname'];
+        const requiredHeaders = ['email', 'firstname', 'lastname'];
         const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
         
         if (missingHeaders.length > 0) {
-            return { error: `Missing required columns: ${missingHeaders.join(', ')}. Required: firstname, lastname` };
+            return { error: `Missing required columns: ${missingHeaders.join(', ')}. Required: email, firstname, lastname` };
         }
 
         // Get column indices
+        const emailIndex = headers.indexOf('email');
         const firstnameIndex = headers.indexOf('firstname');
         const lastnameIndex = headers.indexOf('lastname');
         const departmentIndex = headers.indexOf('department');
@@ -98,6 +108,7 @@ export async function importStaffFromCSV(formData: FormData) {
                 continue;
             }
 
+            const email = row[emailIndex];
             const firstname = row[firstnameIndex];
             const lastname = row[lastnameIndex];
             const department = departmentIndex >= 0 ? row[departmentIndex] || null : null;
@@ -105,16 +116,15 @@ export async function importStaffFromCSV(formData: FormData) {
             const startDate = startDateIndex >= 0 && row[startDateIndex] ? new Date(row[startDateIndex]) : new Date();
             const leavingDate = leavingDateIndex >= 0 && row[leavingDateIndex] ? new Date(row[leavingDateIndex]) : null;
 
-            if (!firstname || !lastname) {
-                errors.push(`Row ${i + 1}: Missing required fields (firstname, lastname)`);
+            if (!email || !firstname || !lastname) {
+                errors.push(`Row ${i + 1}: Missing required fields (email, firstname, lastname)`);
                 continue;
             }
 
-            // Check if staff member already exists (by firstname + lastname combination)
+            // Check if staff member already exists (by email)
             const existingStaff = await prisma.staff.findFirst({
                 where: { 
-                    firstname,
-                    lastname
+                    email
                 }
             });
 
@@ -135,6 +145,7 @@ export async function importStaffFromCSV(formData: FormData) {
                     // Create new staff member
                     await prisma.staff.create({
                         data: {
+                            email,
                             firstname,
                             lastname,
                             department,
