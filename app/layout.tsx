@@ -5,7 +5,7 @@ import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner'; // Make sure this is imported
-import { Home, Laptop, Users, Cable } from 'lucide-react';
+import { Home, Laptop, Users, Cable, ShoppingCart } from 'lucide-react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -50,6 +50,12 @@ export default function RootLayout({
                 <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
                   <Cable className="h-4 w-4" />
                   Parts
+                </Button>
+              </Link>
+              <Link href="/orders" passHref>
+                <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
+                  <ShoppingCart className="h-4 w-4" />
+                  Orders
                 </Button>
               </Link>
               {/* You can add more navigation links here later, e.g., for staff */}

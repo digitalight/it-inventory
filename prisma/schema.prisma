@@ -113,3 +113,65 @@ model PartStockHistory {
   changedAt   DateTime @default(now())
   notes       String?  // additional notes
 }
+
+// Order management system
+model Supplier {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  contactName String?
+  email       String?
+  phone       String?
+  address     String?
+  website     String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  orders      Order[]
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  name            String   // Order name/title
+  supplierId      String
+  supplier        Supplier @relation(fields: [supplierId], references: [id])
+  status          String   @default("Request") // "Request", "Quotes", "Ordered", "Delivered"
+  requestedBy     String   // Name of person who requested the order
+  deliveryCost    Float    @default(0) // Delivery cost in pounds
+  totalAmount     Float    @default(0) // Total order amount (calculated)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deliveredAt     DateTime? // When the order was delivered
+  
+  // Relationships
+  items           OrderItem[]
+  documents       OrderDocument[]
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name        String   // Item name/description
+  quantity    Int      @default(1)
+  unitPrice   Float    @default(0) // Price per unit in pounds
+  totalPrice  Float    @default(0) // quantity * unitPrice
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model OrderDocument {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fileName    String   // Original file name
+  filePath    String   // Path to stored file
+  fileSize    Int      // File size in bytes
+  mimeType    String   // File MIME type
+  documentType String  @default("Quote") // "Quote", "Invoice", "Receipt", etc.
+  uploadedBy  String?  // Who uploaded the document
+  createdAt   DateTime @default(now())
+}
