@@ -25,6 +25,7 @@ export async function getLaptops() {
 export async function addLaptop(formData: FormData) {
   const make = formData.get('make') as string;
   const model = formData.get('model') as string;
+  const deviceName = formData.get('deviceName') as string;
   const serialNumber = formData.get('serialNumber') as string;
   const status = formData.get('status') as string;
   const assignedToEmail = formData.get('assignedTo') as string | null;
@@ -62,6 +63,7 @@ export async function addLaptop(formData: FormData) {
       data: {
         make,
         model,
+        deviceName: deviceName || null,
         serialNumber,
         status,
         assignedToId,
@@ -104,12 +106,13 @@ export async function importLaptopsFromCSV(formData: FormData) {
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
     
     if (missingHeaders.length > 0) {
-      return { error: `Missing required columns: ${missingHeaders.join(', ')}. Required: make, model, serialnumber, status` };
+      return { error: `Missing required columns: ${missingHeaders.join(', ')}. Required: make, model, serialnumber, status. Optional: devicename, assignedtoemail` };
     }
 
     // Get column indices
     const makeIndex = headers.indexOf('make');
     const modelIndex = headers.indexOf('model');
+    const deviceNameIndex = headers.indexOf('devicename');
     const serialNumberIndex = headers.indexOf('serialnumber');
     const statusIndex = headers.indexOf('status');
     const assignedToEmailIndex = headers.indexOf('assignedtoemail'); // Changed to email
@@ -129,6 +132,7 @@ export async function importLaptopsFromCSV(formData: FormData) {
 
       const make = row[makeIndex];
       const model = row[modelIndex];
+      const deviceName = deviceNameIndex >= 0 ? row[deviceNameIndex] || null : null;
       const serialNumber = row[serialNumberIndex];
       const status = row[statusIndex];
       const assignedToEmail = assignedToEmailIndex >= 0 ? row[assignedToEmailIndex] || null : null;
@@ -179,6 +183,7 @@ export async function importLaptopsFromCSV(formData: FormData) {
             data: {
               make,
               model,
+              deviceName,
               status,
               assignedToId,
             }
@@ -190,6 +195,7 @@ export async function importLaptopsFromCSV(formData: FormData) {
             data: {
               make,
               model,
+              deviceName,
               serialNumber,
               status,
               assignedToId,
@@ -220,6 +226,7 @@ export async function updateLaptop(formData: FormData) {
   const id = formData.get('id') as string;
   const make = formData.get('make') as string;
   const model = formData.get('model') as string;
+  const deviceName = formData.get('deviceName') as string;
   const serialNumber = formData.get('serialNumber') as string;
   const status = formData.get('status') as LaptopStatus;
   const assignedToEmail = formData.get('assignedTo') as string | null;
@@ -277,17 +284,19 @@ export async function updateLaptop(formData: FormData) {
       }
     }
 
-    // Update the basic laptop information (make, model, serialNumber)
+    // Update the basic laptop information (make, model, deviceName, serialNumber)
     // Note: assignedToId will be handled by the status logic above
     const updateData: {
       make: string;
       model: string;
+      deviceName: string | null;
       serialNumber: string;
       assignedToId?: string | null;
       status?: string;
     } = {
       make,
       model,
+      deviceName: deviceName || null,
       serialNumber,
     };
 

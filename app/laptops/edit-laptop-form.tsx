@@ -23,6 +23,7 @@ type LaptopData = {
   id: string
   make: string
   model: string
+  deviceName: string | null
   serialNumber: string
   status: string
   assignedTo: {
@@ -61,6 +62,16 @@ export default function EditLaptopForm({
       <div>
         <Label htmlFor="model">Model</Label>
         <Input id="model" name="model" required className="mt-1" defaultValue={laptop.model} />
+      </div>
+      <div>
+        <Label htmlFor="deviceName">Device Name (Optional)</Label>
+        <Input 
+          id="deviceName" 
+          name="deviceName" 
+          placeholder="e.g., John's Laptop, Meeting Room 1" 
+          className="mt-1" 
+          defaultValue={laptop.deviceName || ''} 
+        />
       </div>
       <div>
         <Label htmlFor="serialNumber">Serial Number</Label>

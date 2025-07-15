@@ -150,9 +150,12 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {laptop.make} {laptop.model}
+              {(laptop as any).deviceName || `${laptop.make} ${laptop.model}`}
             </h1>
-            <p className="text-gray-600">Serial Number: {laptop.serialNumber}</p>
+            <p className="text-gray-600">
+              {(laptop as any).deviceName && `${laptop.make} ${laptop.model} • `}
+              Serial Number: {laptop.serialNumber}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -194,6 +197,13 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
                   <label className="text-sm font-medium text-gray-500">Model</label>
                   <p className="text-sm font-semibold">{laptop.model}</p>
                 </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-500">Device Name</label>
+                <p className="text-sm font-semibold">
+                  {(laptop as any).deviceName || 'Not set'}
+                </p>
               </div>
               
               <div>

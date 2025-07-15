@@ -45,6 +45,15 @@ export default function AddLaptopForm({ onSuccess }: { onSuccess?: () => void })
         <Input id="model" name="model" required className="mt-1" />
       </div>
       <div>
+        <Label htmlFor="deviceName">Device Name (Optional)</Label>
+        <Input 
+          id="deviceName" 
+          name="deviceName" 
+          placeholder="e.g., John's Laptop, Meeting Room 1" 
+          className="mt-1" 
+        />
+      </div>
+      <div>
         <Label htmlFor="serialNumber">Serial Number</Label>
         <Input id="serialNumber" name="serialNumber" required className="mt-1" />
       </div>

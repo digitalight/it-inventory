@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,111 +8,99 @@ datasource db {
 }
 
 model Laptop {
-  id           String    @id @default(uuid())
-  make         String
-  model        String
-  serialNumber String    @unique // This is crucial for consistency!
-  status       String    @default("Available") // "Available", "Assigned", "In Repair", "Retired", "Returned"
-  assignedToId String?   // Foreign key to Staff
-  assignedTo   Staff?    @relation(fields: [assignedToId], references: [id])
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  returnDate   DateTime? // Optional: for offboarding planning
-  
-  // Audit trail relationships
-  statusHistory LaptopStatusHistory[]
+  id                String                    @id @default(uuid())
+  make              String
+  model             String
+  serialNumber      String                    @unique
+  status            String                    @default("Available")
+  assignedToId      String?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  returnDate        DateTime?
+  deviceName        String?
+  assignedTo        Staff?                    @relation(fields: [assignedToId], references: [id])
   assignmentHistory LaptopAssignmentHistory[]
+  statusHistory     LaptopStatusHistory[]
 }
 
 model Staff {
-  id           String   @id @default(uuid())
-  email        String   @unique // Add email as unique identifier
-  firstname    String
-  lastname     String
-  department   String?
-  isteacher    Boolean
-  laptops      Laptop[] // One-to-many relationship
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  startDate    DateTime  @default(now())
-  leavingDate  DateTime?
-  
-  // Audit trail relationships
+  id                String                    @id @default(uuid())
+  email             String                    @unique
+  firstname         String
+  lastname          String
+  department        String?
+  isteacher         Boolean
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  startDate         DateTime                  @default(now())
+  leavingDate       DateTime?
+  laptops           Laptop[]
   assignmentHistory LaptopAssignmentHistory[]
 }
 
-// Audit table for laptop status changes
 model LaptopStatusHistory {
-  id          String   @id @default(uuid())
-  laptopId    String
-  laptop      Laptop   @relation(fields: [laptopId], references: [id], onDelete: Cascade)
-  fromStatus  String?  // null for initial status
-  toStatus    String
-  reason      String?  // optional reason for status change
-  changedBy   String?  // who made the change (could be email or name)
-  changedAt   DateTime @default(now())
-  notes       String?  // additional notes about the change
+  id         String   @id @default(uuid())
+  laptopId   String
+  fromStatus String?
+  toStatus   String
+  reason     String?
+  changedBy  String?
+  changedAt  DateTime @default(now())
+  notes      String?
+  laptop     Laptop   @relation(fields: [laptopId], references: [id], onDelete: Cascade)
 }
 
-// Audit table for laptop assignments
 model LaptopAssignmentHistory {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   laptopId     String
-  laptop       Laptop   @relation(fields: [laptopId], references: [id], onDelete: Cascade)
-  staffId      String?  // null when unassigned
-  staff        Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
-  assignedAt   DateTime @default(now())
-  unassignedAt DateTime? // null if currently assigned
-  reason       String?  // reason for assignment/unassignment
-  assignedBy   String?  // who made the assignment
-  notes        String?  // additional notes
+  staffId      String?
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+  reason       String?
+  assignedBy   String?
+  notes        String?
+  staff        Staff?    @relation(fields: [staffId], references: [id])
+  laptop       Laptop    @relation(fields: [laptopId], references: [id], onDelete: Cascade)
 }
 
-// Parts inventory system
 model Category {
   id          String   @id @default(uuid())
   name        String   @unique
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  // Relationships
   parts       Part[]
 }
 
 model Part {
-  id           String   @id @default(uuid())
-  name         String
-  description  String?
-  categoryId   String
-  category     Category @relation(fields: [categoryId], references: [id])
-  stockLevel   Int      @default(0)
-  minStockLevel Int     @default(0) // Alert when stock goes below this
-  location     String?  // Where the part is stored
-  partNumber   String?  // Manufacturer part number
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  // Audit trail
-  stockHistory PartStockHistory[]
+  id            String             @id @default(uuid())
+  name          String
+  description   String?
+  categoryId    String
+  stockLevel    Int                @default(0)
+  minStockLevel Int                @default(0)
+  location      String?
+  partNumber    String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  category      Category           @relation(fields: [categoryId], references: [id])
+  stockHistory  PartStockHistory[]
 }
 
-// Audit table for part stock changes
 model PartStockHistory {
-  id          String   @id @default(uuid())
-  partId      String
-  part        Part     @relation(fields: [partId], references: [id], onDelete: Cascade)
-  changeType  String   // "IN", "OUT", "ADJUSTMENT"
-  quantity    Int      // positive for additions, negative for removals
+  id            String   @id @default(uuid())
+  partId        String
+  changeType    String
+  quantity      Int
   previousStock Int
-  newStock    Int
-  reason      String?  // reason for stock change
-  changedBy   String?  // who made the change
-  changedAt   DateTime @default(now())
-  notes       String?  // additional notes
+  newStock      Int
+  reason        String?
+  changedBy     String?
+  changedAt     DateTime @default(now())
+  notes         String?
+  part          Part     @relation(fields: [partId], references: [id], onDelete: Cascade)
 }
 
-// Order management system
 model Supplier {
   id          String   @id @default(uuid())
   name        String   @unique
@@ -126,52 +112,48 @@ model Supplier {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  // Relationships
   orders      Order[]
 }
 
 model Order {
-  id              String   @id @default(uuid())
-  name            String   // Order name/title
-  supplierId      String
-  supplier        Supplier @relation(fields: [supplierId], references: [id])
-  status          String   @default("Request") // "Request", "Quotes", "Ordered", "Delivered"
-  requestedBy     String   // Name of person who requested the order
-  deliveryCost    Float    @default(0) // Delivery cost in pounds
-  totalAmount     Float    @default(0) // Total order amount (calculated)
-  notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  deliveredAt     DateTime? // When the order was delivered
-  
-  // Relationships
-  items           OrderItem[]
-  documents       OrderDocument[]
+  id           String          @id @default(uuid())
+  name         String
+  supplierId   String
+  status       String          @default("Request")
+  requestedBy  String
+  deliveryCost Float           @default(0)
+  totalAmount  Float           @default(0)
+  notes        String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deliveredAt  DateTime?
+  supplier     Supplier        @relation(fields: [supplierId], references: [id])
+  documents    OrderDocument[]
+  items        OrderItem[]
 }
 
 model OrderItem {
-  id          String   @id @default(uuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  name        String   // Item name/description
-  quantity    Int      @default(1)
-  unitPrice   Float    @default(0) // Price per unit in pounds
-  totalPrice  Float    @default(0) // quantity * unitPrice
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(uuid())
+  orderId    String
+  name       String
+  quantity   Int      @default(1)
+  unitPrice  Float    @default(0)
+  totalPrice Float    @default(0)
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderDocument {
-  id          String   @id @default(uuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  fileName    String   // Original file name
-  filePath    String   // Path to stored file
-  fileSize    Int      // File size in bytes
-  mimeType    String   // File MIME type
-  documentType String  @default("Quote") // "Quote", "Invoice", "Receipt", etc.
-  uploadedBy  String?  // Who uploaded the document
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  orderId      String
+  fileName     String
+  filePath     String
+  fileSize     Int
+  mimeType     String
+  documentType String   @default("Quote")
+  uploadedBy   String?
+  createdAt    DateTime @default(now())
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

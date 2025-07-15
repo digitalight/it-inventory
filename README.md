@@ -97,6 +97,8 @@ node seed-suppliers.mjs
 
 # Import sample laptops (if you have a CSV file)
 # Use the Import feature in the web interface
+# CSV format: make,model,devicename,serialnumber,status,assignedtoemail
+# Example: Apple,MacBook Pro,Teacher's MacBook,ABC123456,Available,
 
 # Import sample staff (if you have a CSV file)
 # Use the Import feature in the web interface

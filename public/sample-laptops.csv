@@ -1,6 +1,9 @@
-make,model,serialnumber,status,assignedtoemail
-Apple,MacBook Pro,ABC123456,Available,
-Dell,Latitude 7420,DEF789012,Assigned,john.smith@school.edu
-HP,EliteBook 840,GHI345678,In Repair,
-Lenovo,ThinkPad X1,JKL901234,Retired,
-Microsoft,Surface Laptop,MNO567890,Assigned,jane.doe@school.edu
+make,model,devicename,serialnumber,status,assignedtoemail
+Apple,MacBook Pro,Teacher's MacBook,ABC123456,Available,
+Dell,Latitude 7420,John's Laptop,DEF789012,Assigned,john.smith@school.edu
+HP,EliteBook 840,IT Support Laptop,GHI345678,In Repair,
+Lenovo,ThinkPad X1,,JKL901234,Retired,
+Microsoft,Surface Laptop,Jane's Surface,MNO567890,Assigned,jane.doe@school.edu
+Asus,VivoBook,Meeting Room 1,PQR135791,Available,
+Acer,Aspire 5,Student Laptop A,STU246802,Available,
+Apple,MacBook Air,Principal's MacBook,VWX369713,Assigned,principal@school.edu

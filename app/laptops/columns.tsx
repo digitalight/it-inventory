@@ -132,14 +132,14 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         onConfirm={handleDelete}
         title="Delete Laptop"
         description="Are you sure you want to delete this laptop? This will remove it from the inventory system."
-        itemName={`${laptop.make} ${laptop.model} (${laptop.serialNumber})`}
+        itemName={laptop.deviceName || `${laptop.make} ${laptop.model} (${laptop.serialNumber})`}
         isDeleting={isDeleting}
       />
 
       {/* History Modal */}
       <LaptopHistoryModal
         laptopId={laptop.id}
-        laptopName={`${laptop.make} ${laptop.model}`}
+        laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
         isOpen={historyModalOpen}
         onClose={() => setHistoryModalOpen(false)}
       />
@@ -149,7 +149,7 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         isOpen={wipeModalOpen}
         onClose={() => setWipeModalOpen(false)}
         laptopId={laptop.id}
-        laptopName={`${laptop.make} ${laptop.model}`}
+        laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
       />
 
       {/* Complete Repair Modal */}
@@ -157,7 +157,7 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         isOpen={repairModalOpen}
         onClose={() => setRepairModalOpen(false)}
         laptopId={laptop.id}
-        laptopName={`${laptop.make} ${laptop.model}`}
+        laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
         hasAssignment={!!laptop.assignedToId}
       />
     </>
@@ -169,6 +169,7 @@ type LaptopWithStaff = {
   id: string
   make: string
   model: string
+  deviceName: string | null
   serialNumber: string
   status: string
   assignedToId: string | null
@@ -184,6 +185,32 @@ type LaptopWithStaff = {
 }
 
 export const columns: ColumnDef<LaptopWithStaff>[] = [
+  {
+    accessorKey: "deviceName",
+    header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Device Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+    },
+    cell: ({ row }) => {
+      const laptop = row.original;
+      const deviceName = laptop.deviceName || "-";
+      return (
+        <Link 
+          href={`/laptops/${laptop.id}`}
+          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+        >
+          {deviceName}
+        </Link>
+      );
+    },
+  },
   {
     accessorKey: "make",
     header: ({ column }) => {

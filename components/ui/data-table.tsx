@@ -101,6 +101,11 @@ export function DataTable<TData, TValue>({
       } catch {}
       
       try {
+        const deviceName = row.getValue("deviceName")
+        if (deviceName) values.push(String(deviceName).toLowerCase())
+      } catch {}
+      
+      try {
         const status = row.getValue("status")
         if (status) values.push(String(status).toLowerCase())
       } catch {}

@@ -57,9 +57,13 @@ export default function ImportCSVForm({ onSuccess }: ImportCSVFormProps) {
           <li><strong>model</strong> - Laptop model</li>
           <li><strong>serialnumber</strong> - Unique serial number</li>
           <li><strong>status</strong> - Available, Assigned, In Repair, or Retired</li>
-          <li><strong>assignedtoemail</strong> - Staff member&apos;s email (optional)</li>
         </ul>
-        <p className="text-xs italic">
+        <p className="font-medium mt-2">Optional CSV columns:</p>
+        <ul className="list-disc list-inside text-xs space-y-0.5">
+          <li><strong>devicename</strong> - Friendly device name (e.g., &quot;John&apos;s Laptop&quot;)</li>
+          <li><strong>assignedtoemail</strong> - Staff member&apos;s email address</li>
+        </ul>
+        <p className="text-xs italic mt-2">
           Note: Existing laptops will be updated with new information.
         </p>
         <a 
