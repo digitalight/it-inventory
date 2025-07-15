@@ -6,7 +6,19 @@ import { revalidatePath } from 'next/cache'; // To refresh data after changes
 
 export async function getStaff() {
     try {
+        const today = new Date();
         const staff = await prisma.staff.findMany({
+            where: {
+                AND: [
+                    { startDate: { lte: today } },
+                    {
+                        OR: [
+                            { leavingDate: { gte: today } },
+                            { leavingDate: null }
+                        ]
+                    }
+                ]
+            },
             include: {
                 laptops: true, // Include assigned laptops
             },
@@ -17,6 +29,48 @@ export async function getStaff() {
         return staff;
     } catch (error) {
         console.error("Failed to fetch staff:", error);
+        return []; // Return empty array on error
+    }
+}
+
+export async function getJoiningStaffList() {
+    try {
+        const today = new Date();
+        const staff = await prisma.staff.findMany({
+            where: {
+                startDate: { gt: today }
+            },
+            include: {
+                laptops: true, // Include assigned laptops
+            },
+            orderBy: {
+                startDate: 'asc', // Show earliest start dates first
+            },
+        });
+        return staff;
+    } catch (error) {
+        console.error("Failed to fetch joining staff:", error);
+        return []; // Return empty array on error
+    }
+}
+
+export async function getLeavingStaffList() {
+    try {
+        const today = new Date();
+        const staff = await prisma.staff.findMany({
+            where: {
+                leavingDate: { lt: today }
+            },
+            include: {
+                laptops: true, // Include assigned laptops
+            },
+            orderBy: {
+                leavingDate: 'desc', // Show most recent leavers first
+            },
+        });
+        return staff;
+    } catch (error) {
+        console.error("Failed to fetch leaving staff:", error);
         return []; // Return empty array on error
     }
 }
@@ -47,6 +101,9 @@ export async function addStaff(formData: FormData) {
             },
         });
         revalidatePath('/staff'); // Tell Next.js to refresh the /staff page's data
+        revalidatePath('/staff/joining'); // Refresh joining staff page
+        revalidatePath('/staff/leavers'); // Refresh leavers page
+        revalidatePath('/'); // Refresh dashboard
         return { success: true };
     } catch (e: unknown) {
         const error = e as { code?: string; message?: string };
@@ -162,6 +219,9 @@ export async function importStaffFromCSV(formData: FormData) {
         }
 
         revalidatePath('/staff');
+        revalidatePath('/staff/joining');
+        revalidatePath('/staff/leavers');
+        revalidatePath('/');
         
         let message = `Import completed: ${imported} new staff members added, ${updated} staff members updated`;
         if (errors.length > 0) {
@@ -203,6 +263,9 @@ export async function updateStaff(formData: FormData) {
             },
         });
         revalidatePath('/staff');
+        revalidatePath('/staff/joining');
+        revalidatePath('/staff/leavers');
+        revalidatePath('/');
         return { success: true };
     } catch (e: unknown) {
         const error = e as { code?: string; message?: string };
@@ -230,6 +293,9 @@ export async function deleteStaff(id: string) {
             where: { id },
         });
         revalidatePath('/staff');
+        revalidatePath('/staff/joining');
+        revalidatePath('/staff/leavers');
+        revalidatePath('/');
         return { success: true };
     } catch (e: unknown) {
         console.error('Error deleting staff:', e);

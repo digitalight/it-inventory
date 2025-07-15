@@ -24,11 +24,13 @@ import { toast } from "sonner"
 import EditStaffForm from "./edit-staff-form"
 import { deleteStaff } from "./actions"
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
+import { AssignLaptopModal } from "@/components/assign-laptop-modal"
 
 // Actions cell component
 function ActionsCell({ staff }: { staff: StaffWithLaptops }) {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [assignLaptopModalOpen, setAssignLaptopModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
@@ -64,6 +66,9 @@ function ActionsCell({ staff }: { staff: StaffWithLaptops }) {
             Copy Name
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setAssignLaptopModalOpen(true)}>
+            Assign Laptop
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
             Edit Staff
           </DropdownMenuItem>
@@ -75,6 +80,14 @@ function ActionsCell({ staff }: { staff: StaffWithLaptops }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Assign Laptop Modal */}
+      <AssignLaptopModal
+        isOpen={assignLaptopModalOpen}
+        onClose={() => setAssignLaptopModalOpen(false)}
+        staffId={staff.id}
+        staffName={`${staff.firstname} ${staff.lastname}`}
+      />
 
       {/* Edit Modal */}
       <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>

@@ -62,7 +62,7 @@ export default function AddStaffForm({ onSuccess }: { onSuccess?: () => void }) 
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="true">Teacher</SelectItem>
-            <SelectItem value="false">Staff</SelectItem>
+            <SelectItem value="false">Associate</SelectItem>
           </SelectContent>
         </Select>
       </div>

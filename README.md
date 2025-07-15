@@ -126,11 +126,13 @@ node seed-suppliers.mjs
 ## Key Features Walkthrough
 
 ### Dashboard
+
 - Overview of system statistics
 - Quick access to all modules
 - Recent activity summary
 
 ### Laptop Management
+
 - Add, edit, and track laptops
 - Assign laptops to staff members
 - Track status changes (Available, Assigned, In Repair, etc.)
@@ -138,18 +140,21 @@ node seed-suppliers.mjs
 - Bulk import from CSV
 
 ### Staff Management
+
 - Manage staff records
 - Track laptop assignments per staff member
 - Handle leaving staff workflow
 - Bulk import from CSV
 
 ### Parts Inventory
+
 - Categorized parts management
 - Stock level tracking with low stock alerts
 - Stock adjustment history
 - Parts movement tracking
 
 ### Order Management
+
 - Create and manage supplier orders
 - Upload order documents (quotes, invoices, receipts)
 - Track order status (Request → Quotes → Ordered → Delivered)
@@ -159,12 +164,14 @@ node seed-suppliers.mjs
 ## Database Management
 
 ### Viewing Data
+
 ```bash
 # Open Prisma Studio - web interface to view/edit data
 npx prisma studio
 ```
 
 ### Database Migrations
+
 ```bash
 # After making schema changes
 npx prisma migrate dev --name "description-of-changes"
@@ -174,6 +181,7 @@ npx prisma migrate reset
 ```
 
 ### Backup Database
+
 ```bash
 # SQLite database is a single file, backup by copying:
 cp prisma/inventory.db prisma/backup-$(date +%Y%m%d).db
@@ -182,6 +190,7 @@ cp prisma/inventory.db prisma/backup-$(date +%Y%m%d).db
 ## File Uploads
 
 The system supports file uploads for order documents:
+
 - Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG
 - Files are stored in `uploads/orders/` directory
 - File information is tracked in the database
@@ -191,18 +200,21 @@ The system supports file uploads for order documents:
 ### Common Issues
 
 1. **Database connection errors**
+
    ```bash
    npx prisma generate
    npx prisma migrate dev
    ```
 
 2. **Missing dependencies**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
    ```
 
 3. **Port already in use**
+
    ```bash
    # Use a different port
    npm run dev -- -p 3001
@@ -213,7 +225,9 @@ The system supports file uploads for order documents:
    - Check available disk space
 
 ### Reset Everything
+
 If you need to start fresh:
+
 ```bash
 # Remove database and start over
 rm prisma/inventory.db
@@ -223,13 +237,16 @@ npx prisma migrate dev --name init
 ## Production Deployment
 
 ### Build for Production
+
 ```bash
 npm run build
 npm run start
 ```
 
 ### Environment Variables for Production
+
 Update your `.env` file with production values:
+
 ```bash
 DATABASE_URL="your-production-database-url"
 NEXTAUTH_URL="your-production-domain"
@@ -249,6 +266,7 @@ NEXTAUTH_SECRET="strong-random-secret"
 ## Support
 
 If you encounter any issues:
+
 1. Check the troubleshooting section above
 2. Ensure all prerequisites are installed
 3. Verify the database setup completed successfully

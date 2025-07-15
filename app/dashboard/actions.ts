@@ -77,6 +77,38 @@ export async function getDashboardStats() {
   }
 }
 
+export async function getJoiningStaff() {
+  try {
+    const now = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+    const joiningStaff = await prisma.staff.findMany({
+      where: {
+        startDate: {
+          gte: now,
+          lte: threeMonthsFromNow
+        }
+      },
+      include: {
+        laptops: {
+          where: {
+            status: 'Assigned'
+          }
+        }
+      },
+      orderBy: {
+        startDate: 'asc'
+      }
+    });
+
+    return joiningStaff;
+  } catch (error) {
+    console.error("Failed to fetch joining staff:", error);
+    return [];
+  }
+}
+
 export async function getLeavingStaff() {
   try {
     const threeMonthsFromNow = new Date();

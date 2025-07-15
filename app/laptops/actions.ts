@@ -496,3 +496,195 @@ export async function completeRepair(formData: FormData) {
     return { error: 'Failed to complete repair. Please try again.' };
   }
 }
+
+export async function getAvailableLaptops() {
+  try {
+    const laptops = await prisma.laptop.findMany({
+      where: {
+        status: 'Available'
+      },
+      orderBy: [
+        { make: 'asc' },
+        { model: 'asc' }
+      ]
+    });
+    return laptops.map(laptop => ({
+      id: laptop.id,
+      make: laptop.make,
+      model: laptop.model,
+      deviceName: (laptop as unknown as { deviceName?: string | null }).deviceName || null,
+      serialNumber: laptop.serialNumber
+    }));
+  } catch (error) {
+    console.error("Failed to fetch available laptops:", error);
+    return [];
+  }
+}
+
+export async function assignLaptopToStaff(laptopId: string, staffId: string) {
+  if (!laptopId || !staffId) {
+    return { error: 'Laptop ID and Staff ID are required.' };
+  }
+
+  try {
+    // Verify laptop exists and is available
+    const laptop = await prisma.laptop.findUnique({
+      where: { id: laptopId }
+    });
+
+    if (!laptop) {
+      return { error: 'Laptop not found.' };
+    }
+
+    if (laptop.status !== 'Available') {
+      return { error: 'Laptop is not available for assignment.' };
+    }
+
+    // Verify staff exists
+    const staff = await prisma.staff.findUnique({
+      where: { id: staffId }
+    });
+
+    if (!staff) {
+      return { error: 'Staff member not found.' };
+    }
+
+    // Use LaptopManager to update status with proper audit trail
+    await LaptopManager.updateLaptopStatus(laptopId, 'Assigned', {
+      reason: 'Laptop assigned to staff member',
+      changedBy: 'System',
+      notes: `Assigned to ${staff.firstname} ${staff.lastname} (${staff.email})`
+    });
+
+    // Update the laptop assignment
+    await prisma.laptop.update({
+      where: { id: laptopId },
+      data: {
+        assignedToId: staffId,
+        status: 'Assigned'
+      }
+    });
+
+    revalidatePath('/laptops');
+    revalidatePath('/staff');
+    revalidatePath('/staff/joining');
+    revalidatePath('/staff/leavers');
+    revalidatePath('/');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error assigning laptop to staff:', error);
+    return { error: 'Failed to assign laptop. Please try again.' };
+  }
+}
+
+export async function reassignLaptop(laptopId: string, newStaffId: string) {
+  if (!laptopId || !newStaffId) {
+    return { error: 'Laptop ID and Staff ID are required.' };
+  }
+
+  try {
+    // Verify laptop exists and is assigned or in repair
+    const laptop = await prisma.laptop.findUnique({
+      where: { id: laptopId },
+      include: { assignedTo: true }
+    });
+
+    if (!laptop) {
+      return { error: 'Laptop not found.' };
+    }
+
+    if (!['Assigned', 'In Repair'].includes(laptop.status)) {
+      return { error: 'Only laptops that are Assigned or In Repair can be reassigned.' };
+    }
+
+    // Verify new staff exists
+    const newStaff = await prisma.staff.findUnique({
+      where: { id: newStaffId }
+    });
+
+    if (!newStaff) {
+      return { error: 'Staff member not found.' };
+    }
+
+    const oldStaffName = laptop.assignedTo 
+      ? `${laptop.assignedTo.firstname} ${laptop.assignedTo.lastname} (${laptop.assignedTo.email})`
+      : 'Unassigned';
+
+    // Update the laptop assignment (keep the same status)
+    await prisma.laptop.update({
+      where: { id: laptopId },
+      data: {
+        assignedToId: newStaffId
+      }
+    });
+
+    // Create history entry for reassignment
+    await prisma.laptopStatusHistory.create({
+      data: {
+        laptopId: laptopId,
+        fromStatus: laptop.status,
+        toStatus: laptop.status,
+        reason: 'Laptop reassigned to different staff member',
+        changedBy: 'System',
+        notes: `Reassigned from ${oldStaffName} to ${newStaff.firstname} ${newStaff.lastname} (${newStaff.email})`
+      }
+    });
+
+    revalidatePath('/laptops');
+    revalidatePath('/staff');
+    revalidatePath('/staff/joining');
+    revalidatePath('/staff/leavers');
+    revalidatePath('/');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error reassigning laptop:', error);
+    return { error: 'Failed to reassign laptop. Please try again.' };
+  }
+}
+
+export async function markLaptopForRepair(formData: FormData) {
+  const laptopId = formData.get('laptopId') as string;
+  const notes = formData.get('notes') as string;
+
+  if (!laptopId) {
+    return { error: 'Laptop ID is required.' };
+  }
+
+  if (!notes || !notes.trim()) {
+    return { error: 'Repair notes are required.' };
+  }
+
+  try {
+    // Get current laptop to verify it's Available or Assigned
+    const laptop = await prisma.laptop.findUnique({
+      where: { id: laptopId },
+      include: { assignedTo: true }
+    });
+
+    if (!laptop) {
+      return { error: 'Laptop not found.' };
+    }
+
+    if (!['Available', 'Assigned'].includes(laptop.status)) {
+      return { error: 'Only laptops with "Available" or "Assigned" status can be marked for repair.' };
+    }
+
+    // Use LaptopManager to update status with proper audit trail
+    await LaptopManager.updateLaptopStatus(laptopId, 'In Repair', {
+      reason: 'Laptop marked for repair',
+      changedBy: 'System',
+      notes: notes.trim()
+    });
+
+    revalidatePath('/laptops');
+    revalidatePath(`/laptops/${laptopId}`);
+    revalidatePath('/'); // Dashboard
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to mark laptop for repair:', error);
+    return { error: 'Failed to mark laptop for repair. Please try again.' };
+  }
+}

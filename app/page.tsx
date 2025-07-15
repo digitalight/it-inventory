@@ -1,15 +1,17 @@
 // app/page.tsx
-import { getDashboardStats, getLeavingStaff, getLaptopsInRepair, getLaptopsForWiping } from './dashboard/actions';
+import { getDashboardStats, getLeavingStaff, getJoiningStaff, getLaptopsInRepair, getLaptopsForWiping } from './dashboard/actions';
 import { DashboardCard } from '@/components/dashboard-card';
 import { DataTable } from '@/components/ui/data-table';
 import { leavingStaffColumns } from '@/components/leaving-staff-columns';
+import { joiningStaffColumns } from '@/components/joining-staff-columns';
 import { LaptopList } from '@/components/laptop-list';
-import { Users, Wrench, RotateCcw } from 'lucide-react';
+import { Users, Wrench, RotateCcw, UserPlus } from 'lucide-react';
 
 export default async function DashboardPage() {
-  const [stats, leavingStaff, laptopsInRepair, laptopsForWiping] = await Promise.all([
+  const [stats, leavingStaff, joiningStaff, laptopsInRepair, laptopsForWiping] = await Promise.all([
     getDashboardStats(),
     getLeavingStaff(),
+    getJoiningStaff(),
     getLaptopsInRepair(),
     getLaptopsForWiping()
   ]);
@@ -75,26 +77,55 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Bottom Section - Grid with Staff Leaving (2/3) and Repair/Wiping (1/3) */}
+      {/* Bottom Section - Staff tables (2/3) and Repair/Wiping (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Staff Leaving Soon - Takes 2/3 width */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md border">
-          <div className="flex justify-between items-center mb-4 border-b pb-3">
-            <h2 className="text-xl font-semibold">Staff Leaving Soon</h2>
-            <span className="text-sm text-gray-500">Next 3 months</span>
-          </div>
-          {leavingStaff.length > 0 ? (
-            <DataTable 
-              columns={leavingStaffColumns} 
-              data={leavingStaff}
-              showSearch={false}
-            />
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Users className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <p>No staff are scheduled to leave in the next 3 months</p>
+        {/* Left Column - Staff Tables (2/3 width) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Staff Joining Soon */}
+          <div className="bg-white p-6 rounded-lg shadow-md border">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-green-500" />
+                Staff Joining Soon
+              </h2>
+              <span className="text-sm text-gray-500">Next 3 months</span>
             </div>
-          )}
+            {joiningStaff.length > 0 ? (
+              <DataTable 
+                columns={joiningStaffColumns} 
+                data={joiningStaff}
+                showSearch={false}
+              />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <UserPlus className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <p>No staff are scheduled to join in the next 3 months</p>
+              </div>
+            )}
+          </div>
+
+          {/* Staff Leaving Soon */}
+          <div className="bg-white p-6 rounded-lg shadow-md border">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Users className="h-5 w-5 text-red-500" />
+                Staff Leaving Soon
+              </h2>
+              <span className="text-sm text-gray-500">Next 3 months</span>
+            </div>
+            {leavingStaff.length > 0 ? (
+              <DataTable 
+                columns={leavingStaffColumns} 
+                data={leavingStaff}
+                showSearch={false}
+              />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <p>No staff are scheduled to leave in the next 3 months</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Column - Repair and Wiping Cards (1/3 width) */}

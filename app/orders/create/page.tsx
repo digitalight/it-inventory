@@ -201,28 +201,28 @@ export default function CreateOrderPage() {
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="supplier">Supplier *</Label>
+                <Label htmlFor="supplier">Supplier *</Label>
+                <div className="flex gap-2">
+                  <Select value={selectedSupplier} onValueChange={setSelectedSupplier} required>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select a supplier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((supplier) => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                          {supplier.contactName && ` (${supplier.contactName})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <AddSupplierModal onSupplierAdded={loadSuppliers}>
-                    <Button type="button" variant="outline" size="sm">
+                    <Button type="button" variant="outline" size="sm" className="shrink-0">
                       <Plus className="mr-1 h-3 w-3" />
                       Add Supplier
                     </Button>
                   </AddSupplierModal>
                 </div>
-                <Select value={selectedSupplier} onValueChange={setSelectedSupplier} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a supplier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                        {supplier.contactName && ` (${supplier.contactName})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 

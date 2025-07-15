@@ -27,6 +27,9 @@ import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
 import { LaptopHistoryModal } from "@/components/laptop-history-modal"
 import { WipeLaptopModal } from "@/components/wipe-laptop-modal"
 import { CompleteRepairModal } from "@/components/complete-repair-modal"
+import { ReassignLaptopModal } from "@/components/reassign-laptop-modal"
+import { MarkRepairModal } from "@/components/mark-repair-modal"
+import { AssignAvailableLaptopModal } from "@/components/assign-available-laptop-modal"
 import Link from "next/link"
 
 // Actions cell component
@@ -36,6 +39,9 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [wipeModalOpen, setWipeModalOpen] = useState(false)
   const [repairModalOpen, setRepairModalOpen] = useState(false)
+  const [reassignModalOpen, setReassignModalOpen] = useState(false)
+  const [markRepairModalOpen, setMarkRepairModalOpen] = useState(false)
+  const [assignLaptopModalOpen, setAssignLaptopModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
@@ -79,6 +85,30 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
           <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
             Edit Laptop
           </DropdownMenuItem>
+          {laptop.status === 'Available' && (
+            <DropdownMenuItem 
+              onClick={() => setAssignLaptopModalOpen(true)}
+              className="text-green-600"
+            >
+              Assign Laptop
+            </DropdownMenuItem>
+          )}
+          {(laptop.status === 'Available' || laptop.status === 'Assigned') && (
+            <DropdownMenuItem 
+              onClick={() => setMarkRepairModalOpen(true)}
+              className="text-orange-600"
+            >
+              Mark Repair
+            </DropdownMenuItem>
+          )}
+          {(laptop.status === 'Assigned' || laptop.status === 'In Repair') && (
+            <DropdownMenuItem 
+              onClick={() => setReassignModalOpen(true)}
+              className="text-blue-600"
+            >
+              Reassign Laptop
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setHistoryModalOpen(true)}>
             View History
           </DropdownMenuItem>
@@ -159,6 +189,31 @@ function ActionsCell({ laptop }: { laptop: LaptopWithStaff }) {
         laptopId={laptop.id}
         laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
         hasAssignment={!!laptop.assignedToId}
+      />
+
+      {/* Reassign Laptop Modal */}
+      <ReassignLaptopModal
+        isOpen={reassignModalOpen}
+        onClose={() => setReassignModalOpen(false)}
+        laptopId={laptop.id}
+        laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
+        currentStaffId={laptop.assignedToId}
+      />
+
+      {/* Mark Repair Modal */}
+      <MarkRepairModal
+        isOpen={markRepairModalOpen}
+        onClose={() => setMarkRepairModalOpen(false)}
+        laptopId={laptop.id}
+        laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
+      />
+
+      {/* Assign Available Laptop Modal */}
+      <AssignAvailableLaptopModal
+        isOpen={assignLaptopModalOpen}
+        onClose={() => setAssignLaptopModalOpen(false)}
+        laptopId={laptop.id}
+        laptopName={laptop.deviceName || `${laptop.make} ${laptop.model}`}
       />
     </>
   )
