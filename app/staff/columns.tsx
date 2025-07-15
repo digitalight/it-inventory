@@ -214,7 +214,11 @@ export const columns: ColumnDef<StaffWithLaptops>[] = [
     },
     cell: ({ row }) => {
       const startDate = row.getValue("startDate") as Date
-      return new Date(startDate).toLocaleDateString()
+      return new Date(startDate).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
     },
   },
   {
@@ -227,7 +231,11 @@ export const columns: ColumnDef<StaffWithLaptops>[] = [
       const isPast = new Date(leavingDate) < new Date()
       return (
         <span className={isPast ? 'text-red-500 font-medium' : 'text-orange-500 font-medium'}>
-          {new Date(leavingDate).toLocaleDateString()}
+          {new Date(leavingDate).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })}
         </span>
       )
     },

@@ -67,7 +67,11 @@ export const joiningStaffColumns: ColumnDef<JoiningStaffWithLaptops>[] = [
       return (
         <div>
           <div className="font-medium">
-            {startDate.toLocaleDateString()}
+            {startDate.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}
           </div>
           <Badge variant={variant} className="text-xs">
             {diffDays > 0 ? `in ${diffDays} days` : diffDays === 0 ? 'Today' : `${Math.abs(diffDays)} days ago`}

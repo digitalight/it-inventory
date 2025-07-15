@@ -225,11 +225,11 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Created</label>
-                  <p className="text-sm">{new Date(laptop.createdAt).toLocaleDateString()}</p>
+                  <p className="text-sm">{new Date(laptop.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Last Updated</label>
-                  <p className="text-sm">{new Date(laptop.updatedAt).toLocaleDateString()}</p>
+                  <p className="text-sm">{new Date(laptop.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                 </div>
               </div>
             </CardContent>
@@ -328,7 +328,7 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
                           <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              {item.date.toLocaleDateString()} at {item.date.toLocaleTimeString()}
+                              {item.date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} at {item.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             {item.changedBy && (
                               <span className="flex items-center gap-1">
@@ -345,7 +345,7 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
                               {item.unassignedAt && (
                                 <span className="block mt-1">
                                   <span className="font-medium">Returned: </span>
-                                  {new Date(item.unassignedAt).toLocaleDateString()}
+                                  {new Date(item.unassignedAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                 </span>
                               )}
                             </div>

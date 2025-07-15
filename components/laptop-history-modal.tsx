@@ -101,7 +101,7 @@ export function LaptopHistoryModal({
               type: 'assignment',
               date: new Date(item.assignedAt),
               description: item.unassignedAt 
-                ? `Assigned to ${item.staff.firstname} ${item.staff.lastname} (returned on ${new Date(item.unassignedAt).toLocaleDateString()})`
+                ? `Assigned to ${item.staff.firstname} ${item.staff.lastname} (returned on ${new Date(item.unassignedAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })})`
                 : `Assigned to ${item.staff.firstname} ${item.staff.lastname} (currently assigned)`,
               reason: item.reason || undefined,
               changedBy: item.assignedBy || undefined,
@@ -170,7 +170,7 @@ export function LaptopHistoryModal({
                         <div className="text-sm text-gray-600 space-y-1 ml-6">
                           <div className="flex items-center gap-4">
                             <span className="font-medium">
-                              {item.date.toLocaleDateString()} at {item.date.toLocaleTimeString()}
+                              {item.date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} at {item.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <Badge variant={item.type === 'status' ? 'default' : 'secondary'}>
                               {item.type === 'status' ? 'Status Change' : 'Assignment'}
@@ -241,7 +241,7 @@ export function LaptopHistoryModal({
                       <div className="text-sm text-gray-600 space-y-1 ml-6">
                         <div className="flex items-center gap-4">
                           <span className="font-medium">
-                            {item.date.toLocaleDateString()} at {item.date.toLocaleTimeString()}
+                            {item.date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} at {item.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           <Badge variant={item.type === 'status' ? 'default' : 'secondary'}>
                             {item.type === 'status' ? 'Status Change' : 'Assignment'}

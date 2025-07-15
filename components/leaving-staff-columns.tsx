@@ -69,7 +69,11 @@ export const leavingStaffColumns: ColumnDef<LeavingStaffWithLaptops>[] = [
       return (
         <div>
           <div className="font-medium">
-            {leavingDate.toLocaleDateString()}
+            {leavingDate.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}
           </div>
           <Badge variant={variant} className="text-xs">
             {diffDays} days
