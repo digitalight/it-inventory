@@ -38,7 +38,7 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Search...",
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const [globalFilter, setGlobalFilter] = useState("")
+  const [globalFilter, setGlobalFilter] = useState<string>("")
 
   const table = useReactTable({
     data,
@@ -163,16 +163,17 @@ export function DataTable<TData, TValue>({
       pagination: {
         pageSize: 20,
       },
+      globalFilter: "",
     },
   })
 
   return (
-    <div>
+    <div className="w-full h-full flex flex-col">
       {showSearch && (
-        <div className="flex items-center py-4 gap-4">
+        <div className="flex items-center py-4 gap-4 w-full">
           <Input
             placeholder={searchPlaceholder}
-            value={globalFilter ?? ""}
+            value={globalFilter}
             onChange={(event) => setGlobalFilter(event.target.value)}
             className="max-w-sm"
             type="text"
@@ -190,8 +191,8 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
       )}
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border flex-1 overflow-auto w-full">
+        <Table className="w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -236,7 +237,7 @@ export function DataTable<TData, TValue>({
       </div>
       
       {/* Pagination */}
-      <div className="flex items-center justify-between space-x-2 py-4">
+      <div className="flex items-center justify-between space-x-2 py-4 w-full">
         <div className="flex-1 text-sm text-muted-foreground">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()} ({table.getFilteredRowModel().rows.length} total items)

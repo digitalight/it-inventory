@@ -120,6 +120,7 @@ export class OrderManager {
       quantity: number;
       unitPrice: number;
       notes?: string;
+      partId?: string | null;
     }>;
     documents?: Array<{
       fileName: string;
@@ -130,7 +131,7 @@ export class OrderManager {
       uploadedBy?: string;
     }>;
   }) {
-    const { items, documents, ...orderData } = data;
+    const { items, documents } = data;
     
     // Calculate total amount
     const itemsTotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
@@ -140,16 +141,20 @@ export class OrderManager {
       // Create the order
       const order = await tx.order.create({
         data: {
-          ...orderData,
+          name: data.name,
+          supplierId: data.supplierId,
+          requestedBy: data.requestedBy,
           deliveryCost: data.deliveryCost || 0,
-          totalAmount
-        }
+          totalAmount,
+          notes: data.notes
+        } as Parameters<typeof tx.order.create>[0]['data']
       });
 
       // Create order items
       const orderItems = await Promise.all(
-        items.map(item => 
-          tx.orderItem.create({
+        items.map(async (item) => {
+          // Create order item first
+          const orderItem = await tx.orderItem.create({
             data: {
               orderId: order.id,
               name: item.name,
@@ -158,8 +163,24 @@ export class OrderManager {
               totalPrice: item.quantity * item.unitPrice,
               notes: item.notes
             }
-          })
-        )
+          });
+
+          // If partId is provided, update it using raw SQL
+          if (item.partId) {
+            try {
+              await tx.$executeRaw`
+                UPDATE OrderItem 
+                SET partId = ${item.partId} 
+                WHERE id = ${orderItem.id}
+              `;
+            } catch (error) {
+              console.error(`Failed to set partId for order item ${orderItem.id}:`, error);
+              // Continue without failing the transaction
+            }
+          }
+
+          return orderItem;
+        })
       );
 
       // Create order documents if any

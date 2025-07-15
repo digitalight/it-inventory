@@ -2,6 +2,7 @@
 "use server";
 
 import { PartsManager } from "@/lib/parts-management";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function getParts() {
@@ -276,5 +277,88 @@ export async function deletePart(id: string) {
   } catch (error) {
     console.error('Failed to delete part:', error);
     return { success: false, error: 'Failed to delete part' };
+  }
+}
+
+export async function getPartsWithOrderInfo() {
+  try {
+    // Get all parts first
+    const parts = await prisma.part.findMany({
+      include: {
+        category: true
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    // For each part, get pending order quantities using raw SQL
+    const partsWithOrderInfo = await Promise.all(
+      parts.map(async (part) => {
+        try {
+          // Use raw query to get order items for this part
+          const orderItems = await prisma.$queryRaw`
+            SELECT 
+              oi.quantity,
+              oi.unitPrice,
+              o.id as orderId,
+              o.name as orderName,
+              o.status
+            FROM OrderItem oi
+            JOIN "Order" o ON oi.orderId = o.id
+            WHERE oi.partId = ${part.id}
+            AND o.status IN ('Request', 'Quotes', 'Ordered')
+          ` as Array<{
+            quantity: number;
+            unitPrice: number;
+            orderId: string;
+            orderName: string;
+            status: string;
+          }>;
+
+          const onOrderQuantity = orderItems.reduce((total, item) => total + item.quantity, 0);
+          const pendingOrders = orderItems.map(item => ({
+            orderId: item.orderId,
+            orderName: item.orderName,
+            quantity: item.quantity,
+            status: item.status,
+            unitPrice: item.unitPrice
+          }));
+
+          return {
+            ...part,
+            onOrderQuantity,
+            pendingOrders
+          };
+        } catch (itemError) {
+          console.error(`Error getting orders for part ${part.id}:`, itemError);
+          return {
+            ...part,
+            onOrderQuantity: 0,
+            pendingOrders: []
+          };
+        }
+      })
+    );
+
+    return partsWithOrderInfo;
+  } catch (error) {
+    console.error('Failed to get parts with order info:', error);
+    // Fall back to regular parts if there's an error
+    try {
+      const parts = await prisma.part.findMany({
+        include: {
+          category: true
+        },
+        orderBy: { name: 'asc' }
+      });
+      
+      return parts.map(part => ({
+        ...part,
+        onOrderQuantity: 0,
+        pendingOrders: []
+      }));
+    } catch (fallbackError) {
+      console.error('Fallback failed:', fallbackError);
+      return [];
+    }
   }
 }

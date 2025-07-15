@@ -6,8 +6,9 @@ A comprehensive inventory management system built with Next.js 15, Prisma, and S
 
 - **Laptop Management**: Track laptops, assignments, status changes, and maintenance
 - **Staff Management**: Manage staff records with laptop assignments and history
-- **Parts Inventory**: Track parts stock levels with low stock alerts
-- **Order Management**: Handle supplier orders with document uploads and status tracking
+- **Parts Inventory**: Track parts stock levels with low stock alerts and order tracking
+- **Order Management**: Handle supplier orders with part selection, document uploads, and status tracking
+- **Part-Order Integration**: Add existing parts to orders with automatic stock updates when delivered
 - **Audit Trails**: Complete history tracking for all changes
 - **File Management**: Upload and manage order documents (quotes, invoices, receipts)
 

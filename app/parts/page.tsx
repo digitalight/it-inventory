@@ -1,6 +1,6 @@
 // app/parts/page.tsx
 import { PartsTable } from "./parts-table";
-import { getParts, getCategories, getOutOfStockParts, getPartsStats } from "./actions";
+import { getCategories, getOutOfStockParts, getPartsStats, getPartsWithOrderInfo } from "./actions";
 import { AddPartModal } from "@/components/add-part-modal";
 import { AddCategoryModal } from "@/components/add-category-modal";
 import { EditCategoryModal } from "@/components/edit-category-modal";
@@ -12,7 +12,7 @@ import { Package, AlertTriangle, TrendingUp, Layers, Plus, Edit } from "lucide-r
 
 export default async function PartsPage() {
   const [parts, categories, outOfStockParts, stats] = await Promise.all([
-    getParts(),
+    getPartsWithOrderInfo(),
     getCategories(),
     getOutOfStockParts(),
     getPartsStats()

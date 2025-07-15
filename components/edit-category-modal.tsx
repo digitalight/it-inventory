@@ -25,9 +25,10 @@ interface EditCategoryModalProps {
     description?: string;
   };
   triggerButton?: React.ReactNode;
+  onSuccess?: () => void;
 }
 
-export function EditCategoryModal({ category, triggerButton }: EditCategoryModalProps) {
+export function EditCategoryModal({ category, triggerButton, onSuccess }: EditCategoryModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +42,8 @@ export function EditCategoryModal({ category, triggerButton }: EditCategoryModal
       if (result.success) {
         toast.success("Category updated successfully!");
         setOpen(false);
+        // Call success callback
+        onSuccess?.();
       } else {
         toast.error(result.error || "Failed to update category");
       }

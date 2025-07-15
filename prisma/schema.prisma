@@ -85,6 +85,7 @@ model Part {
   updatedAt     DateTime           @updatedAt
   category      Category           @relation(fields: [categoryId], references: [id])
   stockHistory  PartStockHistory[]
+  orderItems    OrderItem[]
 }
 
 model PartStockHistory {
@@ -140,9 +141,11 @@ model OrderItem {
   unitPrice  Float    @default(0)
   totalPrice Float    @default(0)
   notes      String?
+  partId     String?  // Optional reference to Part
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  part       Part?    @relation(fields: [partId], references: [id])
 }
 
 model OrderDocument {

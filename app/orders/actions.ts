@@ -11,6 +11,7 @@ interface OrderItemData {
   notes: string
   quantity: number
   unitPrice: number
+  partId?: string | null
 }
 
 export async function getOrders() {
@@ -107,6 +108,7 @@ export async function createOrder(formData: FormData) {
       quantity: number;
       unitPrice: number;
       notes?: string;
+      partId?: string | null;
     }> = [];
     
     if (itemsJson) {
@@ -116,7 +118,8 @@ export async function createOrder(formData: FormData) {
           name: item.name,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
-          notes: item.notes || undefined
+          notes: item.notes || undefined,
+          partId: item.partId || null
         }))
       } catch (error) {
         console.error('Error parsing items JSON:', error)
@@ -186,6 +189,8 @@ export async function createOrder(formData: FormData) {
     }
 
     revalidatePath('/orders');
+    revalidatePath('/parts');
+    revalidatePath('/');
     return { success: true };
   } catch (error) {
     console.error('Error creating order:', error);
@@ -202,8 +207,75 @@ export async function updateOrderStatus(formData: FormData) {
   }
 
   try {
+    // Get the order with items before updating
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: true
+      }
+    });
+
+    if (!order) {
+      return { error: 'Order not found.' };
+    }
+
+    // Update the order status
     await OrderManager.updateOrderStatus(orderId, status);
+
+    // If status is "Delivered", update stock levels for parts
+    if (status === 'Delivered') {
+      // Use raw SQL to check for and update parts
+      for (const item of order.items) {
+        try {
+          // Check if this item has a partId using raw SQL
+          const itemWithPart = await prisma.$queryRaw`
+            SELECT partId FROM OrderItem WHERE id = ${item.id}
+          ` as Array<{ partId: string | null }>;
+          
+          if (itemWithPart.length > 0 && itemWithPart[0].partId) {
+            const partId = itemWithPart[0].partId;
+            
+            // Get current stock level
+            const part = await prisma.part.findUnique({
+              where: { id: partId }
+            });
+
+            if (part) {
+              // Update part stock level
+              await prisma.part.update({
+                where: { id: partId },
+                data: {
+                  stockLevel: {
+                    increment: item.quantity
+                  }
+                }
+              });
+
+              // Create stock history entry
+              await prisma.partStockHistory.create({
+                data: {
+                  partId: partId,
+                  changeType: 'Order Delivered',
+                  quantity: item.quantity,
+                  previousStock: part.stockLevel,
+                  newStock: part.stockLevel + item.quantity,
+                  reason: `Order delivered: ${order.name}`,
+                  changedBy: 'System',
+                  notes: `Order ID: ${orderId}, Item: ${item.name}`
+                }
+              });
+            }
+          }
+        } catch (partError) {
+          console.error(`Error processing part for item ${item.id}:`, partError);
+          // Continue with other items even if one fails
+        }
+      }
+    }
+
     revalidatePath('/orders');
+    revalidatePath('/parts');
+    revalidatePath('/');
     return { success: true };
   } catch (error) {
     console.error('Error updating order status:', error);

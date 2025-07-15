@@ -21,22 +21,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
-import { createPart } from "@/app/parts/actions";
+import { Plus, Edit, Trash2 } from "lucide-react";
+import { createPart, getCategories } from "@/app/parts/actions";
 import { toast } from "sonner";
+import { AddCategoryModal } from "./add-category-modal";
+import { EditCategoryModal } from "./edit-category-modal";
+import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 
 interface Category {
   id: string;
   name: string;
+  description?: string | null;
 }
 
 interface AddPartModalProps {
   categories: Category[];
 }
 
-export function AddPartModal({ categories }: AddPartModalProps) {
+export function AddPartModal({ categories: initialCategories }: AddPartModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState(false);
+
+  // Refresh categories when modal opens or after category operations
+  async function refreshCategories() {
+    try {
+      const updatedCategories = await getCategories();
+      setCategories(updatedCategories);
+    } catch (error) {
+      console.error('Failed to refresh categories:', error);
+    }
+  }
+
+  // Handle category deletion
+  async function handleDeleteCategory() {
+    if (!selectedCategoryId) return;
+    
+    setDeletingCategory(true);
+    try {
+      const { deleteCategory } = await import("@/app/parts/actions");
+      const result = await deleteCategory(selectedCategoryId);
+      if (result.success) {
+        toast.success("Category deleted successfully!");
+        handleCategoryDeleted();
+        setDeleteDialogOpen(false);
+      } else {
+        toast.error(result.error || "Failed to delete category");
+      }
+    } catch {
+      toast.error("Failed to delete category");
+    } finally {
+      setDeletingCategory(false);
+    }
+  }
+
+  // Handle category creation success
+  function handleCategoryCreated() {
+    refreshCategories();
+  }
+
+  // Handle category update success
+  function handleCategoryUpdated() {
+    refreshCategories();
+  }
+
+  // Handle category deletion success
+  function handleCategoryDeleted() {
+    refreshCategories();
+    // Clear selection if deleted category was selected
+    setSelectedCategoryId("");
+  }
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -96,8 +153,53 @@ export function AddPartModal({ categories }: AddPartModalProps) {
           </div>
           
           <div>
-            <Label htmlFor="categoryId">Category *</Label>
-            <Select name="categoryId" required>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="categoryId">Category *</Label>
+              <div className="flex items-center space-x-2">
+                <AddCategoryModal 
+                  triggerButton={
+                    <Button type="button" variant="outline" size="sm">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add
+                    </Button>
+                  }
+                  onSuccess={handleCategoryCreated}
+                />
+                {selectedCategoryId && (
+                  <>
+                    <EditCategoryModal
+                      category={{
+                        id: categories.find(c => c.id === selectedCategoryId)?.id || "",
+                        name: categories.find(c => c.id === selectedCategoryId)?.name || "",
+                        description: categories.find(c => c.id === selectedCategoryId)?.description || undefined
+                      }}
+                      triggerButton={
+                        <Button type="button" variant="outline" size="sm">
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                      }
+                      onSuccess={handleCategoryUpdated}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+            <Select 
+              name="categoryId" 
+              required 
+              value={selectedCategoryId}
+              onValueChange={setSelectedCategoryId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -166,6 +268,17 @@ export function AddPartModal({ categories }: AddPartModalProps) {
             </Button>
           </div>
         </form>
+
+        {/* Delete Category Confirmation Dialog */}
+        <ConfirmDeleteDialog
+          isOpen={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          onConfirm={handleDeleteCategory}
+          title="Delete Category"
+          description="Are you sure you want to delete this category? This action cannot be undone."
+          itemName={categories.find(c => c.id === selectedCategoryId)?.name || ""}
+          isDeleting={deletingCategory}
+        />
       </DialogContent>
     </Dialog>
   );

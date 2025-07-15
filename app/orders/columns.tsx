@@ -173,9 +173,12 @@ export const columns: ColumnDef<Order>[] = [
     header: "Created",
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"))
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
       return (
         <div className="text-sm">
-          {date.toLocaleDateString()}
+          {`${year}-${month}-${day}`}
         </div>
       )
     },

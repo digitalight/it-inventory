@@ -8,15 +8,28 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Upload, X, ArrowLeft } from "lucide-react"
+import { Plus, Trash2, Upload, X, ArrowLeft, Package } from "lucide-react"
 import { createOrder, getSuppliers } from "@/app/orders/actions"
 import { toast } from "sonner"
 import AddSupplierModal from "@/components/add-supplier-modal"
+import { PartSelectionModal } from "@/components/part-selection-modal"
 
 interface Supplier {
   id: string
   name: string
   contactName?: string | null
+}
+
+interface Part {
+  id: string
+  name: string
+  description: string | null
+  partNumber: string | null
+  stockLevel: number
+  location: string | null
+  category: {
+    name: string
+  }
 }
 
 interface OrderItem {
@@ -26,6 +39,7 @@ interface OrderItem {
   quantity: number
   unitPrice: number
   totalPrice: number
+  partId?: string | null // Optional reference to Part
 }
 
 export default function CreateOrderPage() {
@@ -48,6 +62,7 @@ export default function CreateOrderPage() {
     }
   ])
   const [files, setFiles] = useState<File[]>([])
+  const [showPartModal, setShowPartModal] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadSuppliers = async () => {
@@ -92,6 +107,19 @@ export default function CreateOrderPage() {
 
   const getTotalAmount = () => {
     return items.reduce((total, item) => total + item.totalPrice, 0)
+  }
+
+  const handlePartSelected = (part: Part, quantity: number, unitPrice: number) => {
+    const newItem: OrderItem = {
+      id: Date.now().toString(),
+      name: part.name,
+      notes: part.partNumber ? `Part Number: ${part.partNumber}` : "",
+      quantity,
+      unitPrice,
+      totalPrice: quantity * unitPrice,
+      partId: part.id
+    }
+    setItems([...items, newItem])
   }
 
   const removeFile = (indexToRemove: number) => {
@@ -268,10 +296,22 @@ export default function CreateOrderPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Order Items</CardTitle>
-              <Button type="button" onClick={addItem} variant="outline" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Item
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowPartModal(true)} 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  Add Part
+                </Button>
+                <Button type="button" onClick={addItem} variant="outline" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Item
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -414,6 +454,13 @@ export default function CreateOrderPage() {
           </Button>
         </div>
       </form>
+
+      {/* Part Selection Modal */}
+      <PartSelectionModal
+        isOpen={showPartModal}
+        onClose={() => setShowPartModal(false)}
+        onPartSelected={handlePartSelected}
+      />
     </div>
   )
 }

@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Package, AlertTriangle } from "lucide-react";
+import { MoreHorizontal, Package, AlertTriangle, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { AddStockModal } from "@/components/add-stock-modal";
 import { TakeOutPartModal } from "@/components/take-out-part-modal";
@@ -34,6 +34,14 @@ export type PartWithCategory = {
   };
   createdAt: Date;
   updatedAt: Date;
+  onOrderQuantity?: number;
+  pendingOrders?: Array<{
+    orderId: string;
+    orderName: string;
+    quantity: number;
+    status: string;
+    unitPrice?: number;
+  }>;
 };
 
 function getStockBadgeVariant(stockLevel: number, minStockLevel: number) {
@@ -97,6 +105,33 @@ export function createPartsColumns(categories: Array<{ id: string; name: string 
           )}
           <div className="text-sm text-gray-500">
             {statusText}
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "onOrderQuantity",
+    header: "On Order",
+    cell: ({ row }) => {
+      const part = row.original;
+      const onOrderQuantity = part.onOrderQuantity || 0;
+      const pendingOrders = part.pendingOrders || [];
+      
+      if (onOrderQuantity === 0) {
+        return (
+          <div className="text-sm text-gray-400">-</div>
+        );
+      }
+      
+      return (
+        <div className="flex items-center gap-2">
+          <ShoppingCart className="h-4 w-4 text-blue-500" />
+          <Badge variant="secondary" className="font-mono bg-blue-100 text-blue-800">
+            +{onOrderQuantity}
+          </Badge>
+          <div className="text-xs text-blue-600">
+            {pendingOrders.length} order{pendingOrders.length !== 1 ? 's' : ''}
           </div>
         </div>
       );
@@ -199,6 +234,3 @@ export function createPartsColumns(categories: Array<{ id: string; name: string 
   },
 ];
 }
-
-// Backward compatibility export
-export const partsColumns = createPartsColumns([]);

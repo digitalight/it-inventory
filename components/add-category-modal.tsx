@@ -20,9 +20,10 @@ import { toast } from "sonner";
 
 interface AddCategoryModalProps {
   triggerButton?: React.ReactNode;
+  onSuccess?: () => void;
 }
 
-export function AddCategoryModal({ triggerButton }: AddCategoryModalProps) {
+export function AddCategoryModal({ triggerButton, onSuccess }: AddCategoryModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -36,6 +37,8 @@ export function AddCategoryModal({ triggerButton }: AddCategoryModalProps) {
         // Reset form
         const form = document.getElementById('add-category-form') as HTMLFormElement;
         form?.reset();
+        // Call success callback
+        onSuccess?.();
       } else {
         toast.error(result.error || "Failed to create category");
       }
