@@ -4,10 +4,10 @@ import { PartsManager } from "@/lib/parts-management";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const partId = params.id;
+    const { id: partId } = await context.params;
     
     if (!partId) {
       return NextResponse.json(

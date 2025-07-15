@@ -3,8 +3,11 @@ import { getLaptops } from './actions'; // Import your server action
 import { DataTable } from '@/components/ui/data-table'; // The data table component
 import { columns } from './columns'; // Your column definitions
 import { AddLaptopModal } from '@/components/add-laptop-modal'; // The add laptop modal
+import { requireAuth } from '@/lib/auth-simple';
 
 export default async function LaptopsPage() {
+  await requireAuth(); // Protect this page
+  
   const laptops = await getLaptops(); // Data fetched directly on the server!
 
   return (

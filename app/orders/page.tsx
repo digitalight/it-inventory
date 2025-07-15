@@ -6,8 +6,11 @@ import { columns } from "./columns"
 import { getCurrentOrders, getPastOrders } from "./actions"
 import { Plus } from "lucide-react"
 import Link from "next/link"
+import { requireAuth } from '@/lib/auth-simple';
 
 export default async function OrdersPage() {
+  await requireAuth(); // Protect this page
+  
   const [currentOrders, pastOrders] = await Promise.all([
     getCurrentOrders(),
     getPastOrders()

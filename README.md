@@ -4,6 +4,8 @@ A comprehensive inventory management system built with Next.js 15, Prisma, and S
 
 ## Features
 
+- **User Authentication**: Secure login system with role-based access control (admin/user)
+- **User Management**: Admin interface to create, manage, and delete user accounts
 - **Laptop Management**: Track laptops, assignments, status changes, and maintenance
 - **Staff Management**: Manage staff records with laptop assignments and history
 - **Parts Inventory**: Track parts stock levels with low stock alerts and order tracking
@@ -51,22 +53,35 @@ npx prisma generate
 # Create and migrate the database
 npx prisma migrate dev --name init
 
-# (Optional) Seed the database with sample data
+# Seed the database with user accounts and sample data
 npm run seed
 ```
+
+**First Login:**
+After setting up the database and seeding, you can log in with:
+- **Username:** admin
+- **Password:** admin123
+
+**Important:** Change the default password immediately after first login through the user management interface.
 
 ### 4. Environment Configuration
 
 Create a `.env` file in the root directory:
 
 ```bash
-# Database
-DATABASE_URL="file:./prisma/inventory.db"
+# Database URL for SQLite
+DATABASE_URL="file:/Users/your-username/path/to/it-inventory/prisma/inventory.db"
 
-# Next.js
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
+# Basic Authentication
+AUTH_USERNAME="admin"
+AUTH_PASSWORD="admin123"
+AUTH_SECRET="your-secret-key-change-this-in-production"
 ```
+
+**Important Notes:**
+- Replace `your-username/path/to` with your actual path to the project
+- Change the default admin password after first login
+- Generate a strong AUTH_SECRET for production use
 
 ### 5. Start the Development Server
 
@@ -75,6 +90,45 @@ npm run dev
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000)
+
+## Authentication & User Management
+
+### Default Admin Account
+
+The system comes with a default admin account:
+- **Username:** admin
+- **Password:** admin123
+
+### User Management Features
+
+- **Role-based Access**: Admin and User roles with different permissions
+- **Admin Functions**: 
+  - Create new user accounts
+  - Activate/deactivate users
+  - Reset user passwords
+  - Delete user accounts
+  - Access all system features
+- **User Functions**: 
+  - Access to laptop, staff, parts, and order management
+  - Cannot access user management features
+
+### Changing Default Credentials
+
+**Important Security Note:** Change the default admin password immediately after first login:
+
+1. Log in with admin/admin123
+2. Click "Users" in the navigation menu
+3. Find the admin user and click the actions menu (⋯)
+4. Select "Reset Password" and set a strong password
+
+### Adding New Users
+
+Admins can create new user accounts:
+
+1. Navigate to "Users" in the admin menu
+2. Click "Add User"
+3. Fill in username, password, email (optional), and role
+4. Click "Create User"
 
 ## Available Scripts
 
@@ -85,16 +139,30 @@ The application will be available at [http://localhost:3000](http://localhost:30
 - `npx prisma studio` - Open Prisma Studio to view/edit database
 - `npx prisma migrate dev` - Create and apply new database migrations
 
-## Seeding Sample Data (Optional)
+## Seeding Sample Data
 
-To populate the database with sample data for testing:
+The seeding process creates user accounts and sample data for testing:
 
 ```bash
+# Seed users (creates admin and test accounts)
+node seed-users.mjs
+
 # Seed parts and categories
 node seed-parts.mjs
 
 # Seed suppliers
 node seed-suppliers.mjs
+
+# Or run all seeding at once
+npm run seed
+```
+
+### Default User Accounts Created
+
+After seeding, these accounts will be available:
+- **admin** / admin123 (Administrator)
+- **john** / password123 (User)
+- **jane** / password123 (User)
 
 # Import sample laptops (if you have a CSV file)
 # Use the Import feature in the web interface
@@ -200,7 +268,13 @@ The system supports file uploads for order documents:
 
 ### Common Issues
 
-1. **Database connection errors**
+1. **Authentication/Login Issues**
+   ```bash
+   # Verify .env file has correct AUTH_ variables
+   # Check default credentials: admin/admin123
+   ```
+
+2. **Database connection errors**
 
    ```bash
    npx prisma generate
@@ -249,10 +323,17 @@ npm run start
 Update your `.env` file with production values:
 
 ```bash
-DATABASE_URL="your-production-database-url"
-NEXTAUTH_URL="your-production-domain"
-NEXTAUTH_SECRET="strong-random-secret"
+DATABASE_URL="file:/path/to/production/inventory.db"
+AUTH_USERNAME="your-admin-username"
+AUTH_PASSWORD="strong-admin-password"
+AUTH_SECRET="very-strong-random-secret-minimum-32-characters"
 ```
+
+**Security Recommendations for Production:**
+- Use a strong, unique admin password
+- Generate a cryptographically secure AUTH_SECRET (minimum 32 characters)
+- Consider setting up additional admin users and disabling the default account
+- Regularly rotate passwords and secrets
 
 ## Technology Stack
 

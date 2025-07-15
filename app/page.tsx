@@ -6,8 +6,11 @@ import { leavingStaffColumns } from '@/components/leaving-staff-columns';
 import { joiningStaffColumns } from '@/components/joining-staff-columns';
 import { LaptopList } from '@/components/laptop-list';
 import { Users, Wrench, RotateCcw, UserPlus } from 'lucide-react';
+import { requireAuth } from '@/lib/auth-simple';
 
 export default async function DashboardPage() {
+  await requireAuth(); // Protect this page
+
   const [stats, leavingStaff, joiningStaff, laptopsInRepair, laptopsForWiping] = await Promise.all([
     getDashboardStats(),
     getLeavingStaff(),

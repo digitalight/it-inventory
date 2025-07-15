@@ -36,9 +36,9 @@ interface AssignmentHistoryItem {
 }
 
 interface LaptopDetailsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function getLaptopDetails(id: string) {

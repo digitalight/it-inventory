@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,7 +23,7 @@ interface Supplier {
 interface OrderItem {
   id: string
   name: string
-  notes: string
+  notes: string | null
   quantity: number
   unitPrice: number
   totalPrice: number
@@ -59,8 +59,9 @@ interface Order {
   updatedAt: Date
 }
 
-export default function EditOrderPage({ params }: { params: { id: string } }) {
+export default function EditOrderPage() {
   const router = useRouter()
+  const params = useParams()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [order, setOrder] = useState<Order | null>(null)
@@ -82,7 +83,10 @@ export default function EditOrderPage({ params }: { params: { id: string } }) {
   const loadOrder = async () => {
     setLoading(true)
     try {
-      const orderData = await getOrderById(params.id)
+      const orderId = params.id as string
+      if (!orderId) return
+      
+      const orderData = await getOrderById(orderId)
       if (orderData) {
         setOrder(orderData)
         setOrderName(orderData.name)
@@ -182,8 +186,11 @@ export default function EditOrderPage({ params }: { params: { id: string } }) {
     }
 
     setSaving(true)
+    const orderId = params.id as string
+    if (!orderId) return
+    
     const formData = new FormData()
-    formData.append('orderId', params.id)
+    formData.append('orderId', orderId)
     formData.append('name', orderName)
     formData.append('supplierId', selectedSupplier)
     formData.append('requestedBy', requestedBy)
@@ -403,7 +410,7 @@ export default function EditOrderPage({ params }: { params: { id: string } }) {
                 <div className="col-span-12 md:col-span-4">
                   <Label>Notes</Label>
                   <Input
-                    value={item.notes}
+                    value={item.notes || ""}
                     onChange={(e) => updateItem(item.id, 'notes', e.target.value)}
                     placeholder="Model, specifications, etc."
                   />

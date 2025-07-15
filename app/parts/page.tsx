@@ -9,8 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, AlertTriangle, TrendingUp, Layers, Plus, Edit } from "lucide-react";
+import { requireAuth } from '@/lib/auth-simple';
 
 export default async function PartsPage() {
+  await requireAuth(); // Protect this page
+  
   const [parts, categories, outOfStockParts, stats] = await Promise.all([
     getPartsWithOrderInfo(),
     getCategories(),

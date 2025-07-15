@@ -83,9 +83,9 @@ model Part {
   partNumber    String?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
+  orderItems    OrderItem[]
   category      Category           @relation(fields: [categoryId], references: [id])
   stockHistory  PartStockHistory[]
-  orderItems    OrderItem[]
 }
 
 model PartStockHistory {
@@ -141,11 +141,11 @@ model OrderItem {
   unitPrice  Float    @default(0)
   totalPrice Float    @default(0)
   notes      String?
-  partId     String?  // Optional reference to Part
+  partId     String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   part       Part?    @relation(fields: [partId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderDocument {
@@ -159,4 +159,15 @@ model OrderDocument {
   uploadedBy   String?
   createdAt    DateTime @default(now())
   order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // Will store hashed passwords
+  email     String?  @unique
+  role      String   @default("user") // user, admin
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

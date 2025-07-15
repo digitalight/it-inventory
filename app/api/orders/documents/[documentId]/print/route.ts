@@ -4,10 +4,10 @@ import fs from 'fs';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  context: { params: Promise<{ documentId: string }> }
 ) {
   try {
-    const documentId = params.documentId;
+    const { documentId } = await context.params;
 
     // Get document from database
     const document = await prisma.orderDocument.findUnique({

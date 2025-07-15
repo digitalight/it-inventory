@@ -6,8 +6,10 @@ import { AddStaffModal } from '@/components/add-staff-modal'; // The add staff m
 import { Button } from '@/components/ui/button';
 import { UserPlus, Users, UserMinus } from 'lucide-react';
 import Link from 'next/link';
+import { requireAuth } from '@/lib/auth-simple';
 
 export default async function StaffPage() {
+  await requireAuth(); // Protect this page
   const staff = await getStaff(); // Data fetched directly on the server!
 
   return (
