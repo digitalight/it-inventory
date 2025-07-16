@@ -11,17 +11,49 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Home, Laptop, Users, Cable, ShoppingCart, LogOut, User } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useState, useEffect } from 'react';
+
+interface User {
+  id: string;
+  username: string;
+  email?: string | null;
+  role: string;
+}
 
 export function Navigation() {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (status === "loading") {
+  useEffect(() => {
+    // Check authentication status
+    fetch('/api/auth/me')
+      .then(res => res.ok ? res.json() : null)
+      .then(userData => {
+        setUser(userData);
+        setLoading(false);
+      })
+      .catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      window.location.href = '/login';
+    }
+  };
+
+  if (loading) {
     return <div className="h-16 bg-gradient-to-r from-blue-700 to-indigo-800" />; // Loading placeholder
   }
 
-  if (!session) {
+  if (!user) {
     return null; // Don't show navigation if not authenticated
   }
 
@@ -66,14 +98,24 @@ export function Navigation() {
             </Button>
           </Link>
           
+          {/* Show Users link only for admin */}
+          {user.role === 'admin' && (
+            <Link href="/admin/users" passHref>
+              <Button variant="ghost" className="text-white hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Users
+              </Button>
+            </Link>
+          )}
+          
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={session.user?.image || undefined} alt={session.user?.name || ''} />
+                  <AvatarImage src={undefined} alt={user.username} />
                   <AvatarFallback>
-                    {session.user?.name?.charAt(0) || <User className="h-4 w-4" />}
+                    {user.username.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -81,14 +123,17 @@ export function Navigation() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                  <p className="text-sm font-medium leading-none">{user.username}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {session.user?.email}
+                    {user.email || 'No email'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    Role: {user.role}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/auth/signin' })}>
+              <DropdownMenuItem onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
