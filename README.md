@@ -1,108 +1,129 @@
 # IT Inventory Management System
 
-A comprehensive inventory management system built with Next.js 15, Prisma, and SQLite for managing laptops, staff assignments, parts, and orders.
+A simple, modern web application for managing IT equipment, staff, and inventory. Built with Next.js and ready to use out of the box.
 
-## Features
+## 🚀 Quick Start (5 minutes)
 
-- **User Authentication**: Secure login system with role-based access control (admin/user)
-- **User Management**: Admin interface to create, manage, and delete user accounts
-- **Laptop Management**: Track laptops, assignments, status changes, and maintenance
-- **Staff Management**: Manage staff records with laptop assignments and history
-- **Parts Inventory**: Track parts stock levels with low stock alerts and order tracking
-- **Order Management**: Handle supplier orders with part selection, document uploads, and status tracking
-- **Part-Order Integration**: Add existing parts to orders with automatic stock updates when delivered
-- **Audit Trails**: Complete history tracking for all changes
-- **File Management**: Upload and manage order documents (quotes, invoices, receipts)
+### 1. Install Requirements
+You need Node.js installed on your computer. [Download it here](https://nodejs.org/) (choose the LTS version).
 
-## Prerequisites
+### 2. Get the Code
+Download this project and open it in your terminal/command prompt.
 
-Before setting up this project, make sure you have the following installed:
-
-- **Node.js** (version 18 or higher) - [Download here](https://nodejs.org/)
-- **npm** (comes with Node.js)
-- **Git** (optional, for cloning) - [Download here](https://git-scm.com/)
-
-## Quick Setup Instructions
-
-Follow these steps to get the application running on your local machine:
-
-### 1. Clone or Download the Project
-
+### 3. Install & Setup
 ```bash
-# If using Git
-git clone <repository-url>
-cd it-inventory
-
-# Or download the ZIP file and extract it
-```
-
-### 2. Install Dependencies
-
-```bash
+# Install everything needed
 npm install
-```
 
-### 3. Set up the Database
-
-The project uses SQLite with Prisma ORM. Set up the database:
-
-```bash
-# Generate Prisma client
+# Set up the database
 npx prisma generate
-
-# Create and migrate the database
 npx prisma migrate dev --name init
 
-# Seed the database with user accounts and sample data
-npm run seed
-
-# OR, if you only want to create the admin user:
+# Create the admin user
 npm run init-admin
 ```
 
-**First Login:**
-After setting up the database, you can log in with:
-- **Username:** admin
-- **Password:** admin123
-
-**Note:** The admin user will be automatically created on first login attempt if it doesn't exist, but it's recommended to run the seeding or init-admin command explicitly.
-
-**Important:** Change the default password immediately after first login through the user management interface.
-
-### 4. Environment Configuration
-
-Create a `.env` file in the root directory:
-
-```bash
-# Database URL for SQLite
-DATABASE_URL="file:/Users/your-username/path/to/it-inventory/prisma/inventory.db"
-
-# Basic Authentication
-AUTH_USERNAME="admin"
-AUTH_PASSWORD="admin123"
-AUTH_SECRET="your-secret-key-change-this-in-production"
-```
-
-**Important Notes:**
-- Replace `your-username/path/to` with your actual path to the project
-- Change the default admin password after first login
-- Generate a strong AUTH_SECRET for production use
-
-### 5. Start the Development Server
-
+### 4. Start the Application
 ```bash
 npm run dev
 ```
 
-The application will be available at [http://localhost:3000](http://localhost:3000)
+Open your browser and go to: **http://localhost:3000**
 
-## Authentication & User Management
+### 5. Login
+- **Username:** `admin`
+- **Password:** `admin123`
 
-### Default Admin Account
+**⚠️ Important:** Change this password immediately after logging in!
 
-The system comes with a default admin account:
-- **Username:** admin
-- **Password:** admin123
+## 📋 What This System Does
+
+- **👥 User Management** - Add/remove users with different permission levels
+- **💻 Laptop Tracking** - Track all laptops, who has them, and their status
+- **🏢 Staff Management** - Manage staff records and laptop assignments
+- **🔧 Parts Inventory** - Track spare parts and stock levels
+- **📦 Order Management** - Handle orders from suppliers with document uploads
+- **📊 Dashboard** - Overview of everything at a glance
+
+## 🎯 First Steps After Login
+
+1. **Change Admin Password**
+   - Click "Users" in the top menu
+   - Find "admin" user → click the ⋯ menu → "Reset Password"
+
+2. **Add Your Team**
+   - Go to "Users" → "Add User"
+   - Create accounts for your team members
+
+3. **Import Your Data**
+   - Use the import features in Laptops and Staff sections
+   - Or add items manually through the interface
+
+## 🛠 Common Commands
+
+```bash
+# Start the application
+npm run dev
+
+# Create admin user (if needed)
+npm run init-admin
+
+# Check who's in the system
+npm run check-users
+
+# View/edit database directly
+npx prisma studio
+```
+
+## 🆘 Having Problems?
+
+### "Can't login" or "No admin user"
+```bash
+npm run init-admin
+```
+
+### "Database error" or something's broken
+```bash
+npx prisma generate
+npx prisma migrate dev
+npm run init-admin
+```
+
+### Need to start over completely?
+```bash
+rm prisma/inventory.db
+npx prisma migrate dev --name init
+npm run init-admin
+```
+
+## 📁 How It's Organized
+
+Your data is stored in:
+- **Database:** `prisma/inventory.db` (back this up!)
+- **Uploaded Files:** `uploads/` folder
+- **Configuration:** `.env` file
+
+## 🔒 Security Notes
+
+- Change the default admin password immediately
+- The system stores passwords securely (encrypted)
+- Only admins can manage users
+- All actions are logged for audit trails
+
+## 🚀 Ready for Production?
+
+See `PRODUCTION_READY.md` for deployment instructions and security recommendations.
+
+---
+
+**Need Help?** Check the troubleshooting section above or review the detailed documentation in the original README sections below.
+
+---
+
+## 📖 Detailed Documentation
+
+<details>
+<summary>Click to expand full documentation</summary>
 
 ### User Management Features
 
@@ -117,15 +138,6 @@ The system comes with a default admin account:
   - Access to laptop, staff, parts, and order management
   - Cannot access user management features
 
-### Changing Default Credentials
-
-**Important Security Note:** Change the default admin password immediately after first login:
-
-1. Log in with admin/admin123
-2. Click "Users" in the navigation menu
-3. Find the admin user and click the actions menu (⋯)
-4. Select "Reset Password" and set a strong password
-
 ### Adding New Users
 
 Admins can create new user accounts:
@@ -135,230 +147,70 @@ Admins can create new user accounts:
 3. Fill in username, password, email (optional), and role
 4. Click "Create User"
 
-## Available Scripts
+### Available Scripts
 
 - `npm run dev` - Start development server with Turbopack
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-- `npm run seed` - Create admin and sample user accounts
 - `npm run init-admin` - Create only the default admin user
 - `npm run check-users` - List all users in the database
 - `npx prisma studio` - Open Prisma Studio to view/edit database
 - `npx prisma migrate dev` - Create and apply new database migrations
 
-## Seeding Sample Data
+### Key Features Walkthrough
 
-The seeding process creates user accounts and sample data for testing:
-
-```bash
-# Seed users (creates admin and test accounts)
-node seed-users.mjs
-
-# Seed parts and categories
-node seed-parts.mjs
-
-# Seed suppliers
-node seed-suppliers.mjs
-
-# Or run all seeding at once
-npm run seed
-```
-
-### Default User Accounts Created
-
-After seeding, these accounts will be available:
-- **admin** / admin123 (Administrator)
-- **john** / password123 (User)
-- **jane** / password123 (User)
-
-# Import sample laptops (if you have a CSV file)
-# Use the Import feature in the web interface
-# CSV format: make,model,devicename,serialnumber,status,assignedtoemail
-# Example: Apple,MacBook Pro,Teacher's MacBook,ABC123456,Available,
-
-# Import sample staff (if you have a CSV file)
-# Use the Import feature in the web interface
-```
-
-## Project Structure
-
-```
-├── app/                    # Next.js 15 App Router
-│   ├── dashboard/         # Dashboard page
-│   ├── laptops/          # Laptop management
-│   ├── staff/            # Staff management
-│   ├── parts/            # Parts inventory
-│   ├── orders/           # Order management
-│   └── api/              # API routes
-├── components/           # Reusable UI components
-├── lib/                 # Utility functions and configurations
-├── prisma/              # Database schema and migrations
-│   ├── schema.prisma    # Database schema
-│   └── inventory.db     # SQLite database (created after setup)
-├── public/              # Static files and sample templates
-└── uploads/             # File uploads (created automatically)
-```
-
-## Key Features Walkthrough
-
-### Dashboard
-
+**Dashboard**
 - Overview of system statistics
 - Quick access to all modules
 - Recent activity summary
 
-### Laptop Management
-
+**Laptop Management**
 - Add, edit, and track laptops
 - Assign laptops to staff members
 - Track status changes (Available, Assigned, In Repair, etc.)
 - Complete audit trail of assignments and status changes
 - Bulk import from CSV
 
-### Staff Management
-
+**Staff Management**
 - Manage staff records
 - Track laptop assignments per staff member
 - Handle leaving staff workflow
 - Bulk import from CSV
 
-### Parts Inventory
-
+**Parts Inventory**
 - Categorized parts management
 - Stock level tracking with low stock alerts
 - Stock adjustment history
 - Parts movement tracking
 
-### Order Management
-
+**Order Management**
 - Create and manage supplier orders
 - Upload order documents (quotes, invoices, receipts)
 - Track order status (Request → Quotes → Ordered → Delivered)
 - Automatic status updates based on document uploads
 - Supplier management
 
-## Database Management
+### Database Management
 
-### Viewing Data
-
+**Viewing Data**
 ```bash
-# Open Prisma Studio - web interface to view/edit data
-npx prisma studio
+npx prisma studio  # Web interface to view/edit data
 ```
 
-### Database Migrations
-
+**Backup Database**
 ```bash
-# After making schema changes
-npx prisma migrate dev --name "description-of-changes"
-
-# Reset database (⚠️ This deletes all data)
-npx prisma migrate reset
-```
-
-### Backup Database
-
-```bash
-# SQLite database is a single file, backup by copying:
 cp prisma/inventory.db prisma/backup-$(date +%Y%m%d).db
 ```
 
-## File Uploads
+### File Uploads
 
 The system supports file uploads for order documents:
-
 - Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG
 - Files are stored in `uploads/orders/` directory
 - File information is tracked in the database
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication/Login Issues**
-   ```bash
-   # Check if admin user exists
-   npm run check-users
-   
-   # Create admin user if missing
-   npm run init-admin
-   
-   # Verify .env file has correct AUTH_ variables
-   # Default credentials: admin/admin123
-   ```
-
-2. **"No admin user found" Error**
-   ```bash
-   # Create the default admin user
-   npm run init-admin
-   
-   # Or run full seeding (creates admin + sample users)
-   npm run seed
-   ```
-
-3. **Database connection errors**
-
-   ```bash
-   npx prisma generate
-   npx prisma migrate dev
-   ```
-
-2. **Missing dependencies**
-
-   ```bash
-   rm -rf node_modules package-lock.json
-   npm install
-   ```
-
-3. **Port already in use**
-
-   ```bash
-   # Use a different port
-   npm run dev -- -p 3001
-   ```
-
-4. **File upload issues**
-   - Ensure `uploads/` directory has write permissions
-   - Check available disk space
-
-### Reset Everything
-
-If you need to start fresh:
-
-```bash
-# Remove database and start over
-rm prisma/inventory.db
-npx prisma migrate dev --name init
-```
-
-## Production Deployment
-
-### Build for Production
-
-```bash
-npm run build
-npm run start
-```
-
-### Environment Variables for Production
-
-Update your `.env` file with production values:
-
-```bash
-DATABASE_URL="file:/path/to/production/inventory.db"
-AUTH_USERNAME="your-admin-username"
-AUTH_PASSWORD="strong-admin-password"
-AUTH_SECRET="very-strong-random-secret-minimum-32-characters"
-```
-
-**Security Recommendations for Production:**
-- Use a strong, unique admin password
-- Generate a cryptographically secure AUTH_SECRET (minimum 32 characters)
-- Consider setting up additional admin users and disabling the default account
-- Regularly rotate passwords and secrets
-
-## Technology Stack
+### Technology Stack
 
 - **Frontend**: Next.js 15 with App Router, React 19, TypeScript
 - **Styling**: Tailwind CSS, Radix UI components
@@ -368,15 +220,4 @@ AUTH_SECRET="very-strong-random-secret-minimum-32-characters"
 - **Forms**: React Hook Form with validation
 - **Notifications**: Sonner toast notifications
 
-## Support
-
-If you encounter any issues:
-
-1. Check the troubleshooting section above
-2. Ensure all prerequisites are installed
-3. Verify the database setup completed successfully
-4. Check the browser console for any JavaScript errors
-
-## License
-
-This project is private and proprietary.
+</details>
