@@ -13,7 +13,7 @@ import Link from 'next/link';
 // Type definitions for history items
 interface StatusHistoryItem {
   id: string;
-  fromStatus: string;
+  fromStatus: string | null;
   toStatus: string;
   reason?: string | null;
   changedBy?: string | null;
@@ -32,7 +32,7 @@ interface AssignmentHistoryItem {
     firstname: string;
     lastname: string;
     email: string;
-  };
+  } | null;
 }
 
 interface LaptopDetailsPageProps {
@@ -116,19 +116,19 @@ export default async function LaptopDetailsPage({ params }: LaptopDetailsPagePro
     ...history.statusHistory.map((item: StatusHistoryItem) => ({
       type: 'status' as const,
       date: new Date(item.changedAt),
-      title: `Status changed from ${item.fromStatus} to ${item.toStatus}`,
+      title: `Status changed from ${item.fromStatus || 'Unknown'} to ${item.toStatus}`,
       description: item.reason || 'No reason provided',
       changedBy: item.changedBy,
       notes: item.notes,
-      fromStatus: item.fromStatus,
+      fromStatus: item.fromStatus || 'Unknown',
       toStatus: item.toStatus,
     })),
     ...history.assignmentHistory.map((item: AssignmentHistoryItem) => ({
       type: 'assignment' as const,
       date: new Date(item.assignedAt),
       title: item.unassignedAt 
-        ? `Unassigned from ${item.staff.firstname} ${item.staff.lastname}`
-        : `Assigned to ${item.staff.firstname} ${item.staff.lastname}`,
+        ? `Unassigned from ${item.staff?.firstname || 'Unknown'} ${item.staff?.lastname || 'User'}`
+        : `Assigned to ${item.staff?.firstname || 'Unknown'} ${item.staff?.lastname || 'User'}`,
       description: item.reason || 'No reason provided',
       changedBy: item.assignedBy,
       notes: item.notes,

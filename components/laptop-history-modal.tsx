@@ -16,7 +16,7 @@ import { getLaptopHistory } from "@/app/laptops/history-actions";
 
 interface StatusHistoryItem {
   id: string;
-  fromStatus: string;
+  fromStatus: string | null;
   toStatus: string;
   reason?: string | null;
   changedBy?: string | null;
@@ -33,7 +33,7 @@ interface AssignmentHistoryItem {
     firstname: string;
     lastname: string;
     email: string;
-  };
+  } | null;
 }
 
 interface LaptopHistoryModalProps {
@@ -54,8 +54,8 @@ interface HistoryItem {
     firstname: string;
     lastname: string;
     email: string;
-  };
-  fromStatus?: string;
+  } | null;
+  fromStatus?: string | null;
   toStatus?: string;
 }
 
@@ -89,7 +89,7 @@ export function LaptopHistoryModal({
             const statusItems: HistoryItem[] = statusHistory.map((item: StatusHistoryItem) => ({
               type: 'status',
               date: new Date(item.changedAt),
-              description: `Status changed from ${item.fromStatus} to ${item.toStatus}`,
+              description: `Status changed from ${item.fromStatus || 'Unknown'} to ${item.toStatus}`,
               reason: item.reason || undefined,
               changedBy: item.changedBy || undefined,
               fromStatus: item.fromStatus,
@@ -101,8 +101,8 @@ export function LaptopHistoryModal({
               type: 'assignment',
               date: new Date(item.assignedAt),
               description: item.unassignedAt 
-                ? `Assigned to ${item.staff.firstname} ${item.staff.lastname} (returned on ${new Date(item.unassignedAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })})`
-                : `Assigned to ${item.staff.firstname} ${item.staff.lastname} (currently assigned)`,
+                ? `Assigned to ${item.staff?.firstname || 'Unknown'} ${item.staff?.lastname || 'User'} (returned on ${new Date(item.unassignedAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })})`
+                : `Assigned to ${item.staff?.firstname || 'Unknown'} ${item.staff?.lastname || 'User'} (currently assigned)`,
               reason: item.reason || undefined,
               changedBy: item.assignedBy || undefined,
               staff: item.staff

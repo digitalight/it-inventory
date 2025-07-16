@@ -22,7 +22,7 @@ interface Supplier {
 interface OrderItem {
   id: string
   name: string
-  notes: string
+  notes: string | null
   quantity: number
   unitPrice: number
   totalPrice: number
@@ -325,7 +325,7 @@ export default function EditOrderModal({
                   <div className="col-span-4">
                     <Label>Notes</Label>
                     <Input
-                      value={item.notes}
+                      value={item.notes || ''}
                       onChange={(e) => updateItem(item.id, 'notes', e.target.value)}
                       placeholder="Model, specifications, etc."
                     />

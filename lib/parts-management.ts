@@ -221,9 +221,9 @@ export class PartsManager {
     return await prisma.part.findMany({
       where: {
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { partNumber: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } }
+          { name: { contains: query } },
+          { partNumber: { contains: query } },
+          { description: { contains: query } }
         ]
       },
       include: {
