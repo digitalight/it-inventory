@@ -55,12 +55,17 @@ npx prisma migrate dev --name init
 
 # Seed the database with user accounts and sample data
 npm run seed
+
+# OR, if you only want to create the admin user:
+npm run init-admin
 ```
 
 **First Login:**
-After setting up the database and seeding, you can log in with:
+After setting up the database, you can log in with:
 - **Username:** admin
 - **Password:** admin123
+
+**Note:** The admin user will be automatically created on first login attempt if it doesn't exist, but it's recommended to run the seeding or init-admin command explicitly.
 
 **Important:** Change the default password immediately after first login through the user management interface.
 
@@ -136,6 +141,9 @@ Admins can create new user accounts:
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run seed` - Create admin and sample user accounts
+- `npm run init-admin` - Create only the default admin user
+- `npm run check-users` - List all users in the database
 - `npx prisma studio` - Open Prisma Studio to view/edit database
 - `npx prisma migrate dev` - Create and apply new database migrations
 
@@ -270,11 +278,26 @@ The system supports file uploads for order documents:
 
 1. **Authentication/Login Issues**
    ```bash
+   # Check if admin user exists
+   npm run check-users
+   
+   # Create admin user if missing
+   npm run init-admin
+   
    # Verify .env file has correct AUTH_ variables
-   # Check default credentials: admin/admin123
+   # Default credentials: admin/admin123
    ```
 
-2. **Database connection errors**
+2. **"No admin user found" Error**
+   ```bash
+   # Create the default admin user
+   npm run init-admin
+   
+   # Or run full seeding (creates admin + sample users)
+   npm run seed
+   ```
+
+3. **Database connection errors**
 
    ```bash
    npx prisma generate

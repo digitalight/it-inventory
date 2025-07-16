@@ -69,6 +69,9 @@ export async function requireAdmin(): Promise<AuthUser> {
 
 export async function validateCredentials(username: string, password: string): Promise<AuthUser | null> {
   try {
+    // Ensure default admin user exists on first login attempt
+    await ensureDefaultAdmin()
+    
     const user = await prisma.user.findUnique({
       where: { 
         username,
@@ -117,5 +120,33 @@ export async function createUser(username: string, password: string, email?: str
     email: user.email,
     role: user.role,
     isAuthenticated: true
+  }
+}
+
+// Ensure default admin user exists
+export async function ensureDefaultAdmin(): Promise<void> {
+  try {
+    const adminExists = await prisma.user.findUnique({
+      where: { username: 'admin' }
+    })
+
+    if (!adminExists) {
+      console.log('🔧 Creating default admin user...')
+      const hashedPassword = await bcrypt.hash('admin123', 12)
+      
+      await prisma.user.create({
+        data: {
+          username: 'admin',
+          password: hashedPassword,
+          email: 'admin@localhost',
+          role: 'admin',
+          isActive: true
+        }
+      })
+      
+      console.log('✅ Default admin user created: admin/admin123')
+    }
+  } catch (error) {
+    console.error('Error ensuring default admin:', error)
   }
 }

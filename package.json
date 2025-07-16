@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node seed-users.mjs",
+    "init-admin": "node init-admin.mjs",
+    "check-users": "node check-users.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",
