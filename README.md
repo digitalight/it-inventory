@@ -15,6 +15,11 @@ Download this project and open it in your terminal/command prompt.
 # Install everything needed
 npm install
 
+# Make an .env file and add database file:
+
+nano .env
+DATABASE_URL="file:./inventory.db"
+
 # Set up the database
 npx prisma generate
 npx prisma migrate dev --name init
