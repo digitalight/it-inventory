@@ -126,6 +126,56 @@ export async function importStaffFromCSV(formData: FormData) {
         return { error: 'Please select a CSV file.' };
     }
 
+    // Helper function to parse DD/MM/YYYY or DD/MM/YY dates
+    function parseDate(dateString: string): Date | null {
+        if (!dateString || dateString.trim() === '') {
+            return null;
+        }
+        
+        const cleaned = dateString.trim();
+        
+        // Check for DD/MM/YYYY or DD/MM/YY format
+        const ddmmyyyyPattern = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
+        const match = cleaned.match(ddmmyyyyPattern);
+        
+        if (match) {
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            let year = parseInt(match[3], 10);
+            
+            // Handle 2-digit years (assume 20xx for years < 50, 19xx for years >= 50)
+            if (year < 100) {
+                year += year < 50 ? 2000 : 1900;
+            }
+            
+            // Validate date components
+            if (month < 1 || month > 12 || day < 1 || day > 31) {
+                return null;
+            }
+            
+            // Create date in YYYY-MM-DD format to avoid locale issues
+            const date = new Date(year, month - 1, day); // month is 0-based in Date constructor
+            
+            // Verify the date is valid and matches what we expected
+            if (date.getFullYear() === year && 
+                date.getMonth() === month - 1 && 
+                date.getDate() === day) {
+                return date;
+            }
+        }
+        
+        // Try ISO format as fallback (YYYY-MM-DD)
+        const isoPattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (isoPattern.test(cleaned)) {
+            const date = new Date(cleaned);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+        
+        return null;
+    }
+
     try {
         const text = await file.text();
         const lines = text.split('\n').filter(line => line.trim());
@@ -170,8 +220,30 @@ export async function importStaffFromCSV(formData: FormData) {
             const lastname = row[lastnameIndex];
             const department = departmentIndex >= 0 ? row[departmentIndex] || null : null;
             const isteacher = isteacherIndex >= 0 ? row[isteacherIndex]?.toLowerCase() === 'true' : false;
-            const startDate = startDateIndex >= 0 && row[startDateIndex] ? new Date(row[startDateIndex]) : new Date();
-            const leavingDate = leavingDateIndex >= 0 && row[leavingDateIndex] ? new Date(row[leavingDateIndex]) : null;
+            
+            // Parse dates using DD/MM/YYYY format
+            let startDate: Date;
+            let leavingDate: Date | null = null;
+            
+            if (startDateIndex >= 0 && row[startDateIndex]) {
+                const parsedStartDate = parseDate(row[startDateIndex]);
+                if (parsedStartDate) {
+                    startDate = parsedStartDate;
+                } else {
+                    errors.push(`Row ${i + 1}: Invalid start date format "${row[startDateIndex]}". Use DD/MM/YYYY format.`);
+                    continue;
+                }
+            } else {
+                startDate = new Date(); // Default to today if no start date provided
+            }
+            
+            if (leavingDateIndex >= 0 && row[leavingDateIndex]) {
+                leavingDate = parseDate(row[leavingDateIndex]);
+                if (leavingDate === null && row[leavingDateIndex].trim() !== '') {
+                    errors.push(`Row ${i + 1}: Invalid leaving date format "${row[leavingDateIndex]}". Use DD/MM/YYYY format.`);
+                    continue;
+                }
+            }
 
             if (!email || !firstname || !lastname) {
                 errors.push(`Row ${i + 1}: Missing required fields (email, firstname, lastname)`);

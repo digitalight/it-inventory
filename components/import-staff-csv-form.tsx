@@ -53,15 +53,19 @@ export default function ImportStaffCSVForm({ onSuccess }: ImportStaffCSVFormProp
       <div className="text-sm text-gray-600 space-y-1">
         <p className="font-medium">Required CSV columns:</p>
         <ul className="list-disc list-inside text-xs space-y-0.5">
-          <li><strong>firstname</strong> - First name</li>
-          <li><strong>lastname</strong> - Last name</li>
+          <li><strong>email</strong> - Email address (required)</li>
+          <li><strong>firstname</strong> - First name (required)</li>
+          <li><strong>lastname</strong> - Last name (required)</li>
           <li><strong>department</strong> - Department (optional)</li>
           <li><strong>isteacher</strong> - true for Teacher, false for Staff (optional)</li>
-          <li><strong>startdate</strong> - Start date in YYYY-MM-DD format (optional)</li>
-          <li><strong>leavingdate</strong> - Leaving date in YYYY-MM-DD format (optional)</li>
+          <li><strong>startdate</strong> - Start date in DD/MM/YYYY format (optional)</li>
+          <li><strong>leavingdate</strong> - Leaving date in DD/MM/YYYY format (optional)</li>
         </ul>
         <p className="text-xs italic">
-          Note: Existing staff members will be updated with new information.
+          Note: Existing staff members (by email) will be updated with new information.
+        </p>
+        <p className="text-xs text-orange-600">
+          <strong>Date format:</strong> Use DD/MM/YYYY (e.g., 15/03/2024 for March 15, 2024)
         </p>
         <a 
           href="/sample-staff.csv" 
